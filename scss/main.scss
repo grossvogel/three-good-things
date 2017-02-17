@@ -1,0 +1,119 @@
+$pink-bg-bold: #D75694;
+$pink-bg-pale: #F9F2F5;
+$color-text: #555;
+$color-accent: #D75694;
+$color-accent-pale: #D1BBC6;
+
+@mixin shadow{
+  box-shadow:1px 2px 2px rgba(0,0,0,0.18);
+}
+@mixin rounded{
+  border-radius: 4px;
+}
+
+$header-height:4rem;
+$padding:1rem;
+$max-width:500px;
+
+html{
+  font-family:'Roboto', sans-serif;
+  font-size:16px;
+  line-height:1.4;
+}
+body{
+  margin:0;
+  padding:0;
+  background:$pink-bg-pale;
+  text-align:center;
+  color:$color-text;
+}
+header{
+  @include shadow;
+  background:$pink-bg-bold;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height: $header-height;
+}
+footer{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height: $header-height;
+}
+.inner{
+  position:relative;
+  text-align:left;
+  margin: 0 auto;
+  max-width:$max-width;
+  padding: 0 $padding;
+  width:auto;
+}
+section.inner{
+  padding-top: ($header-height + $padding);
+}
+
+h1{
+  font-size:1.3rem;
+}
+
+.input-row{
+  margin-bottom:$padding;
+  label{
+    font-size:0.9rem;
+    text-transform:uppercase;
+    display:block;
+    color:lighten($color-text, 10%);
+  }
+  input{
+    width:280px;
+    border:1px solid $color-accent-pale;
+    background:#fff;
+    padding: 0.5rem;
+    font-size:1.2rem;
+    &:focus{
+      border:1px solid $color-accent;
+    }
+  }
+}
+button, .button{
+  background:$color-accent;
+  color:#fff;
+  font-size:1.3rem;
+  padding: (0.5 * $padding) $padding;
+  border:0;
+  @include shadow;
+  @include rounded;
+}
+.error{
+  background:lighten($pink-bg-pale, 3%);
+  border:2px solid $pink-bg-bold;
+  padding: $padding;
+  text-align: left;
+}
+
+header{
+  .logo{
+    position:absolute;
+    top: 1rem;
+    left: $padding;
+  }
+  .menu{
+    position:absolute;
+    top: 1.5rem;
+    right: $padding;
+  }
+}
+
+.loginContainer{
+  .toggle{
+    display:inline-block;
+    font-size:0.9rem;
+    margin-left: 2rem;
+  }
+  .google{
+    margin-top: $padding * 4;
+  }
+}
