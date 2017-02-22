@@ -4,7 +4,7 @@ module.exports = function Footer(_props) {
   return (
     <footer>
       <div className="inner">
-        footer goes here
+        &nbsp;
       </div>
     </footer>
   );

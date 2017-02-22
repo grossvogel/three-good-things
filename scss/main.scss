@@ -1,8 +1,17 @@
-$pink-bg-bold: #D75694;
-$pink-bg-pale: #F9F2F5;
-$color-text: #555;
-$color-accent: #D75694;
-$color-accent-pale: #D1BBC6;
+$color_text: #555;
+
+//	pink
+/*
+$color_accent_1:#D75694;  //  bold / dark
+$color_accent_2:#D1BBC6;
+$color_accent_3:#F9F2F5;  //  pale / light
+*/
+
+//	blue
+$color_accent_1:#38B4DB;  //  bold / dark
+$color_accent_2:#66CCEC;
+$color_accent_3:#F2F8F9;  //  pale / light
+$color_gray_1:#7E898C;
 
 @mixin shadow{
   box-shadow:1px 2px 2px rgba(0,0,0,0.18);
@@ -23,18 +32,19 @@ html{
 body{
   margin:0;
   padding:0;
-  background:$pink-bg-pale;
+  background:$color_accent_3;
   text-align:center;
-  color:$color-text;
+  color:$color_text;
 }
 header{
   @include shadow;
-  background:$pink-bg-bold;
+  background:$color_accent_1;
   position:fixed;
   top:0;
   left:0;
   right:0;
   height: $header-height;
+  z-index:2;
 }
 footer{
   position:fixed;
@@ -51,8 +61,8 @@ footer{
   padding: 0 $padding;
   width:auto;
 }
-section.inner{
-  padding-top: ($header-height + $padding);
+section.main{
+  padding-top: $header-height;
 }
 
 h1{
@@ -65,31 +75,44 @@ h1{
     font-size:0.9rem;
     text-transform:uppercase;
     display:block;
-    color:lighten($color-text, 10%);
+    color:lighten($color_text, 10%);
   }
-  input{
+  input, textarea{
+    $bg: darken($color_accent_3, 2%);
     width:280px;
-    border:1px solid $color-accent-pale;
-    background:#fff;
+    background:$bg;
+    border:1px solid $bg;
     padding: 0.5rem;
     font-size:1.2rem;
+    @include rounded;
+    color:$color_text;
     &:focus{
-      border:1px solid $color-accent;
+      border:1px solid $color_accent_1;
+      background:#fff;
+      box-shadow:inset 1px 2px 2px rgba(0,0,0,0.2);
     }
+  }
+  textarea{
+    height:8rem;
+    font-size:1rem;
   }
 }
 button, .button{
-  background:$color-accent;
+  background:linear-gradient(to bottom, lighten($color_accent_1, 3%), darken($color_accent_1, 1%));
   color:#fff;
   font-size:1.3rem;
   padding: (0.5 * $padding) $padding;
   border:0;
   @include shadow;
   @include rounded;
+  &:hover{
+    background:darken($color_accent_1, 5%);
+    box-shadow:none;
+  }
 }
 .error{
-  background:lighten($pink-bg-pale, 3%);
-  border:2px solid $pink-bg-bold;
+  background:lighten($color_accent_3, 3%);
+  border:2px solid $color_accent_1;
   padding: $padding;
   text-align: left;
 }
@@ -115,5 +138,65 @@ header{
   }
   .google{
     margin-top: $padding * 4;
+  }
+}
+
+.day{
+  z-index:1;
+  li{
+    position:relative;
+    background:#fff;
+    list-style:none;
+    padding:$padding $padding $padding (4 * $padding);
+    border-bottom:1px solid #ddd;
+    box-shadow: 0 2px 2px rgba(0,0,0,0.2);
+    &.editing{
+      background:transparent;
+      box-shadow:none;
+    }
+    &:last-child.editing{
+      border-bottom:none;
+    }
+  }
+  .number{
+    position:absolute;
+    left: 0;
+    top: $padding;
+    font-size:35px;
+    color:$color_accent_1;
+    line-height:1;
+    width:4 * $padding;
+    text-align:center;
+  }
+  .title{
+    font-size:1.2rem;
+    padding-top: 0.25rem;
+  }
+  .details{
+    opacity:0.8;
+    font-size:0.9rem;
+    margin-bottom:0;
+  }
+}
+.day .nav{
+  background:$color_gray_1;
+  color:$color_accent_3;
+  text-transform:uppercase;
+  text-align:center;
+  padding: 0.5rem 0;
+  font-size:1.1rem;
+  .inner{
+    position:relative;
+    text-align:center;
+    .prev{
+      position:absolute;
+      top: 0;
+      left: $padding;
+    }
+    .next{
+      position:absolute;
+      top: 0;
+      right: $padding;
+    }
   }
 }

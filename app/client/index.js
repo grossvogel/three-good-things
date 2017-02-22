@@ -12,7 +12,7 @@ var routes = (
   <Router history={hashHistory}>
     <Route path="/" component={App}>
       <IndexRoute component={Day} onEnter={loginCheck}/>
-      <Route path="day/:date" component={Day} onEnter={loginCheck}/>
+      <Route path="day/:date(/:editIndex)" component={Day} onEnter={loginCheck}/>
       <Route path="login" component={Login}/>
     </Route>
   </Router>

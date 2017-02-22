@@ -1,0 +1,13 @@
+{
+  "short_name": "Three Good Things",
+  "name": "Three Good Things",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    }
+  ],
+  "start_url": "/",
+  "gcm_sender_id": "909261344315"
+}

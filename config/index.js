@@ -10,6 +10,9 @@ const defaults = {
   google: {
     id: process.env.GOOGLE_CLIENT_ID,
     secret: process.env.GOOGLE_CLIENT_SECRET
+  },
+  push: {
+    serverKey: process.env.PUSH_MSG_SERVER_KEY
   }
 };
 

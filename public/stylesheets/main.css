@@ -1,3 +1,8 @@
+/*
+$color_accent_1:#D75694;  //  bold / dark
+$color_accent_2:#D1BBC6;
+$color_accent_3:#F9F2F5;  //  pale / light
+*/
 html {
   font-family: 'Roboto', sans-serif;
   font-size: 16px;
@@ -6,18 +11,19 @@ html {
 body {
   margin: 0;
   padding: 0;
-  background: #F9F2F5;
+  background: #F2F8F9;
   text-align: center;
   color: #555; }
 
 header {
   box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.18);
-  background: #D75694;
+  background: #38B4DB;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 4rem; }
+  height: 4rem;
+  z-index: 2; }
 
 footer {
   position: fixed;
@@ -34,8 +40,8 @@ footer {
   padding: 0 1rem;
   width: auto; }
 
-section.inner {
-  padding-top: 5rem; }
+section.main {
+  padding-top: 4rem; }
 
 h1 {
   font-size: 1.3rem; }
@@ -47,27 +53,37 @@ h1 {
     text-transform: uppercase;
     display: block;
     color: #6f6f6f; }
-  .input-row input {
+  .input-row input, .input-row textarea {
     width: 280px;
-    border: 1px solid #D1BBC6;
-    background: #fff;
+    background: #ebf4f6;
+    border: 1px solid #ebf4f6;
     padding: 0.5rem;
-    font-size: 1.2rem; }
-    .input-row input:focus {
-      border: 1px solid #D75694; }
+    font-size: 1.2rem;
+    border-radius: 4px;
+    color: #555; }
+    .input-row input:focus, .input-row textarea:focus {
+      border: 1px solid #38B4DB;
+      background: #fff;
+      box-shadow: inset 1px 2px 2px rgba(0, 0, 0, 0.2); }
+  .input-row textarea {
+    height: 8rem;
+    font-size: 1rem; }
 
 button, .button {
-  background: #D75694;
+  background: linear-gradient(to bottom, #45b9dd, #34b2da);
   color: #fff;
   font-size: 1.3rem;
   padding: 0.5rem 1rem;
   border: 0;
   box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.18);
   border-radius: 4px; }
+  button:hover, .button:hover {
+    background: #26aad3;
+    box-shadow: none; }
 
 .error {
-  background: #fefcfd;
-  border: 2px solid #D75694;
+  background: #fcfefe;
+  border: 2px solid #38B4DB;
   padding: 1rem;
   text-align: left; }
 
@@ -88,5 +104,55 @@ header .menu {
 
 .loginContainer .google {
   margin-top: 4rem; }
+
+.day {
+  z-index: 1; }
+  .day li {
+    position: relative;
+    background: #fff;
+    list-style: none;
+    padding: 1rem 1rem 1rem 4rem;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2); }
+    .day li.editing {
+      background: transparent;
+      box-shadow: none; }
+    .day li:last-child.editing {
+      border-bottom: none; }
+  .day .number {
+    position: absolute;
+    left: 0;
+    top: 1rem;
+    font-size: 35px;
+    color: #38B4DB;
+    line-height: 1;
+    width: 4rem;
+    text-align: center; }
+  .day .title {
+    font-size: 1.2rem;
+    padding-top: 0.25rem; }
+  .day .details {
+    opacity: 0.8;
+    font-size: 0.9rem;
+    margin-bottom: 0; }
+
+.day .nav {
+  background: #7E898C;
+  color: #F2F8F9;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0.5rem 0;
+  font-size: 1.1rem; }
+  .day .nav .inner {
+    position: relative;
+    text-align: center; }
+    .day .nav .inner .prev {
+      position: absolute;
+      top: 0;
+      left: 1rem; }
+    .day .nav .inner .next {
+      position: absolute;
+      top: 0;
+      right: 1rem; }
 
 /*# sourceMappingURL=main.css.map */

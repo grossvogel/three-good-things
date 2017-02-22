@@ -1,5 +1,6 @@
 const React = require('react');
 const auth = require('./auth');
+const InputRow = require('./input-row');
 
 const Login = React.createClass({
   getInitialState: function() {
@@ -102,6 +103,7 @@ function LoginComponent(props) {
           {title}
         </h1>
         <InputRow label="Username or email address"
+          autoFocus={true}
           value={props.username} placeholder="email@123.com"
           onChange={props.onUpdateUsername}/>
         <InputRow label="Password" type="password"
@@ -116,18 +118,8 @@ function LoginComponent(props) {
     );
   }
   return (
-    <div className="loginContainer">
+    <div className="inner loginContainer">
       {inner}
-    </div>
-  );
-}
-
-function InputRow(props) {
-  var type = props.type ? props.type : 'text';
-  return (
-    <div className="input-row">
-      <label>{props.label}</label>
-      <input type={type} value={props.value} placeholder={props.placehoder} onChange={props.onChange}/>
     </div>
   );
 }

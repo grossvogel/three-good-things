@@ -16,6 +16,7 @@ global.appRequire = function(name) {
 const db = appRequire('db');
 const router = appRequire('router');
 const errors = appRequire('errors');
+const auth = appRequire('auth');
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use(sessions({
 app.use(csurf({
   sessionKey: 'session'
 }));
+app.use(auth.loadUserFromSession);
 
 
 //	misc setup

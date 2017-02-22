@@ -16,15 +16,28 @@ passport.use(new GoogleStrategy({
 ));
 
 //  exports
+module.exports.loadUserFromSession = function loadUserFromSession(req, _res, next) {
+  req.user = null;
+  if (!req.session.userId) return next();
+
+  User.findById(req.session.userId).then(function(user) {
+    if(user) {
+      req.user = user;
+    }
+    next();
+  }).catch(function(_err) {
+    next();
+  });
+};
 module.exports.getCurrentUser = function getCurrentUser(req, res, _next) {
-  var user = req.session.user || null;
+  var user = req.user || null;
   return res.json({ err: null, user: user });
 };
 
 module.exports.processSignup = function processSignup(req, res, _next) {
   createUserWithPassword(req.body.username, req.body.password).then(function(user) {
-    if(user) {
-      req.session.user = user;
+    if (user) {
+      req.session.userId = user.id;
     }
     res.json({ err: null, user: user });
   }).catch(function(err) {
@@ -38,7 +51,7 @@ module.exports.processLogin = function processLogin(req, res, next) {
     if (!user) {
       return res.json({ err: 'Login info could not be verified', user: null });
     } else {
-      req.session.user = user;
+      req.session.userId = user.id;
       return res.json({ err: null, user: user });
     }
   })(req, res, next);
@@ -48,7 +61,7 @@ module.exports.googleRedirect = passport.authenticate('google', { scope: 'https:
 module.exports.googleCallback = function googleCallback(req, res, next) {
   passport.authenticate('google', function(err, user, _info) {
     if(user) {
-      req.session.user = user;
+      req.session.userId = user.id;
     }
     res.redirect('/');
   })(req, res, next);
@@ -57,6 +70,16 @@ module.exports.googleCallback = function googleCallback(req, res, next) {
 module.exports.googleLogin = googleLogin;
 module.exports.passwordLogin = passwordLogin;
 module.exports.createUserWithPassword = createUserWithPassword;
+
+module.exports.requireUser = function(req, res, next) {
+  if (!req.user) {
+    res.status(401);
+    res.json({ err: 'Authentication Required' });
+  } else {
+    console.log(req.user.id);
+    next();
+  }
+};
 
 //  logic
 function newUser(username) {
@@ -149,3 +172,4 @@ function createLocalIdentityForUser(user, rawPW) {
     return user;
   });
 }
+
