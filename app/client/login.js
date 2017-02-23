@@ -103,7 +103,6 @@ function LoginComponent(props) {
           {title}
         </h1>
         <InputRow label="Username or email address"
-          autoFocus={true}
           value={props.username} placeholder="email@123.com"
           onChange={props.onUpdateUsername}/>
         <InputRow label="Password" type="password"
@@ -112,7 +111,10 @@ function LoginComponent(props) {
         <input type="submit" value={buttonText} className="button"/>
         <a href="#" className="toggle" onClick={props.onToggleView}>{toggle}</a>
         <div className="google">
-          <a href="/auth/google">Sign in with Google</a>
+          <div className="or">or</div>
+          <a href="/auth/google">
+            <img src="images/button-google.png" alt="Sign in with Google" className="googleButton"/>
+          </a>
         </div>
       </form>
     );
@@ -120,6 +122,19 @@ function LoginComponent(props) {
   return (
     <div className="inner loginContainer">
       {inner}
+      <div className="blurb">
+        <h2>What is this all about?</h2>
+        <p>
+          Writing down three good things each day&nbsp;
+          <a target="_blank" href="https://ppc.sas.upenn.edu/sites/ppc.sas.upenn.edu/files/ppprogressarticle.pdf">
+            can make you happier
+          </a>.
+          This simple app
+          will remind you to record your three
+          things every day and store them for
+          future reference.
+        </p>
+      </div>
     </div>
   );
 }

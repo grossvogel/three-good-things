@@ -3604,6 +3604,14 @@ module.exports.get = function get(endpoint) {
   }));
 };
 
+module.exports.request = request;
+
+function request(endpoint, method, options) {
+  options = options || {};
+  options.method = method || 'get';
+  return fetch(endpoint, getOptions(options));
+};
+
 const defaults = {
   method: 'post',
   credentials: 'include',
@@ -7852,7 +7860,7 @@ function ContextSubscriber(name) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return routerShape; });
-/* unused harmony export locationShape */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return locationShape; });
 
 
 var func = __WEBPACK_IMPORTED_MODULE_0_react__["PropTypes"].func,
@@ -8349,6 +8357,8 @@ module.exports = getIteratorFn;
 /* 73 */
 /***/ (function(module, exports) {
 
+const DAYS = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
+
 module.exports.extract = function extract(date, local) {
   if(!date) return null;
 
@@ -8397,6 +8407,20 @@ module.exports.previousDay = function previousDay(date) {
   return prev;
 };
 
+module.exports.getTimezone = function getTimezone() {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+};
+
+module.exports.formatHour = function formatHour(intHour) {
+  if (intHour == 0) {
+    return '12 AM';
+  } else if (intHour > 12) {
+    return '' + (intHour - 12) + ' PM';
+  } else {
+    return intHour + ' AM';
+  }
+};
+
 module.exports.getHourInTimezone = function getHourInTimezone(date, timezone) {
   return applyDateFormat(date, {
     timeZone: timezone,
@@ -8414,12 +8438,11 @@ module.exports.getDateInTimezone = function getDateInTimezone(date, timezone) {
   return new Date(Date.UTC(year, month - 1, day));
 };
 
-const DAYS = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
-
 function applyDateFormat(date, options) {
   var formatter = new Intl.DateTimeFormat(['en-us'], options);
   return formatter.format(date);
 }
+
 
 
 /***/ }),
@@ -12127,7 +12150,7 @@ module.exports = function App(props) {
   return React.createElement(
     'div',
     { className: 'app' },
-    React.createElement(Header, null),
+    React.createElement(Header, { router: props.router }),
     React.createElement(
       'section',
       { className: 'main' },
@@ -12141,11 +12164,12 @@ module.exports = function App(props) {
 /***/ (function(module, exports, __webpack_require__) {
 
 const React = __webpack_require__(5);
+const Router = __webpack_require__(117);
 const auth = __webpack_require__(43);
 const dateUtil = __webpack_require__(73);
 const api = __webpack_require__(28);
 const GoodThing = __webpack_require__(118);
-const NotificationButton = __webpack_require__(120);
+const Link = Router.Link;
 
 var Day = module.exports = React.createClass({
   displayName: 'exports',
@@ -12172,19 +12196,7 @@ var Day = module.exports = React.createClass({
       editIndex: index
     });
   },
-  handleNav: function (e) {
-    e.preventDefault();
-    var newDate;
-    if (e.target.getAttribute('href') == '#next') {
-      newDate = dateUtil.nextDay(this.state.date);
-    } else {
-      newDate = dateUtil.previousDay(this.state.date);
-    }
-    var dest = '/day/' + dateUtil.stringify(newDate);
-    this.props.router.push(dest);
-  },
   componentWillReceiveProps: function (nextProps) {
-    console.log(nextProps.params);
     [date, today] = extractDate(nextProps.params.date);
     this.setState({
       date: date,
@@ -12208,7 +12220,6 @@ var Day = module.exports = React.createClass({
       today: this.state.today,
       date: this.state.date,
       editIndex: this.state.editIndex,
-      onNav: this.handleNav,
       onUpdateGoodThing: this.handleUpdateGoodThing,
       onEditGoodThing: this.handleEditGoodThing,
       goodThings: this.state.goodThings });
@@ -12216,6 +12227,8 @@ var Day = module.exports = React.createClass({
 });
 
 function DayComponent(props) {
+  var nextDay = dateUtil.stringify(dateUtil.nextDay(props.date));
+  var prevDay = dateUtil.stringify(dateUtil.previousDay(props.date));
   return React.createElement(
     'div',
     { className: 'day' },
@@ -12226,15 +12239,23 @@ function DayComponent(props) {
         'div',
         { className: 'inner' },
         React.createElement(
-          'a',
-          { href: '#prev', className: 'prev', onClick: props.onNav },
-          'Prev'
+          Link,
+          { to: '/day/' + prevDay, className: 'prev' },
+          React.createElement(
+            'span',
+            null,
+            'Previous Day'
+          )
         ),
         props.today && 'Today' || dateUtil.niceFormat(props.date),
         props.today || React.createElement(
-          'a',
-          { href: '#next', className: 'next', onClick: props.onNav },
-          'Next'
+          Link,
+          { to: '/day/' + nextDay, className: 'next' },
+          React.createElement(
+            'span',
+            null,
+            'Next Day'
+          )
         )
       )
     ),
@@ -12248,8 +12269,7 @@ function DayComponent(props) {
         onEditGoodThing: props.onEditGoodThing,
         goodThing: goodThing,
         key: goodThing.id || goodThing.key }))
-    ),
-    React.createElement(NotificationButton, null)
+    )
   );
 }
 
@@ -12427,7 +12447,6 @@ function LoginComponent(props) {
         title
       ),
       React.createElement(InputRow, { label: 'Username or email address',
-        autoFocus: true,
         value: props.username, placeholder: 'email@123.com',
         onChange: props.onUpdateUsername }),
       React.createElement(InputRow, { label: 'Password', type: 'password',
@@ -12443,9 +12462,14 @@ function LoginComponent(props) {
         'div',
         { className: 'google' },
         React.createElement(
+          'div',
+          { className: 'or' },
+          'or'
+        ),
+        React.createElement(
           'a',
           { href: '/auth/google' },
-          'Sign in with Google'
+          React.createElement('img', { src: 'images/button-google.png', alt: 'Sign in with Google', className: 'googleButton' })
         )
       )
     );
@@ -12453,7 +12477,27 @@ function LoginComponent(props) {
   return React.createElement(
     'div',
     { className: 'inner loginContainer' },
-    inner
+    inner,
+    React.createElement(
+      'div',
+      { className: 'blurb' },
+      React.createElement(
+        'h2',
+        null,
+        'What is this all about?'
+      ),
+      React.createElement(
+        'p',
+        null,
+        'Writing down three good things each day\xA0',
+        React.createElement(
+          'a',
+          { target: '_blank', href: 'https://ppc.sas.upenn.edu/sites/ppc.sas.upenn.edu/files/ppprogressarticle.pdf' },
+          'can make you happier'
+        ),
+        '. This simple app will remind you to record your three things every day and store them for future reference.'
+      )
+    )
   );
 }
 
@@ -12474,43 +12518,44 @@ module.exports = __webpack_require__(157);
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Router__ = __webpack_require__(219);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__Router__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Router", function() { return __WEBPACK_IMPORTED_MODULE_0__Router__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Link__ = __webpack_require__(102);
-/* unused harmony reexport Link */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Link", function() { return __WEBPACK_IMPORTED_MODULE_1__Link__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__IndexLink__ = __webpack_require__(215);
-/* unused harmony reexport IndexLink */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "IndexLink", function() { return __WEBPACK_IMPORTED_MODULE_2__IndexLink__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__withRouter__ = __webpack_require__(230);
-/* unused harmony reexport withRouter */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "withRouter", function() { return __WEBPACK_IMPORTED_MODULE_3__withRouter__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__IndexRedirect__ = __webpack_require__(216);
-/* unused harmony reexport IndexRedirect */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "IndexRedirect", function() { return __WEBPACK_IMPORTED_MODULE_4__IndexRedirect__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__IndexRoute__ = __webpack_require__(217);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_5__IndexRoute__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "IndexRoute", function() { return __WEBPACK_IMPORTED_MODULE_5__IndexRoute__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__Redirect__ = __webpack_require__(104);
-/* unused harmony reexport Redirect */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Redirect", function() { return __WEBPACK_IMPORTED_MODULE_6__Redirect__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__Route__ = __webpack_require__(218);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_7__Route__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Route", function() { return __WEBPACK_IMPORTED_MODULE_7__Route__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__RouteUtils__ = __webpack_require__(17);
-/* unused harmony reexport createRoutes */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "createRoutes", function() { return __WEBPACK_IMPORTED_MODULE_8__RouteUtils__["b"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__RouterContext__ = __webpack_require__(67);
-/* unused harmony reexport RouterContext */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "RouterContext", function() { return __WEBPACK_IMPORTED_MODULE_9__RouterContext__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__PropTypes__ = __webpack_require__(66);
-/* unused harmony reexport locationShape */
-/* unused harmony reexport routerShape */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "locationShape", function() { return __WEBPACK_IMPORTED_MODULE_10__PropTypes__["b"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "routerShape", function() { return __WEBPACK_IMPORTED_MODULE_10__PropTypes__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__match__ = __webpack_require__(228);
-/* unused harmony reexport match */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "match", function() { return __WEBPACK_IMPORTED_MODULE_11__match__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__useRouterHistory__ = __webpack_require__(109);
-/* unused harmony reexport useRouterHistory */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "useRouterHistory", function() { return __WEBPACK_IMPORTED_MODULE_12__useRouterHistory__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__PatternUtils__ = __webpack_require__(25);
-/* unused harmony reexport formatPattern */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "formatPattern", function() { return __WEBPACK_IMPORTED_MODULE_13__PatternUtils__["c"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__applyRouterMiddleware__ = __webpack_require__(221);
-/* unused harmony reexport applyRouterMiddleware */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "applyRouterMiddleware", function() { return __WEBPACK_IMPORTED_MODULE_14__applyRouterMiddleware__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__browserHistory__ = __webpack_require__(222);
-/* unused harmony reexport browserHistory */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "browserHistory", function() { return __WEBPACK_IMPORTED_MODULE_15__browserHistory__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__hashHistory__ = __webpack_require__(226);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_16__hashHistory__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "hashHistory", function() { return __WEBPACK_IMPORTED_MODULE_16__hashHistory__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__createMemoryHistory__ = __webpack_require__(106);
-/* unused harmony reexport createMemoryHistory */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "createMemoryHistory", function() { return __WEBPACK_IMPORTED_MODULE_17__createMemoryHistory__["a"]; });
 /* components */
 
 
@@ -12630,8 +12675,7 @@ function GoodThingComponent(props) {
         'form',
         { onSubmit: props.onSubmit },
         React.createElement(InputRow, { placeholder: 'what good thing happened today?',
-          autoFocus: true, value: props.title,
-          onChange: props.onUpdateTitle }),
+          value: props.title, onChange: props.onUpdateTitle }),
         React.createElement(
           'div',
           { className: 'input-row' },
@@ -12678,101 +12722,65 @@ function saveGoodThing(data) {
 /***/ (function(module, exports, __webpack_require__) {
 
 const React = __webpack_require__(5);
+const Router = __webpack_require__(117);
+const Link = Router.Link;
 
-module.exports = function Header(_props) {
+module.exports = function Header(props) {
   return React.createElement(
-    "header",
-    null,
-    React.createElement(
-      "div",
-      { className: "inner" },
-      React.createElement("img", { className: "logo", src: "/images/logo.png", alt: "three-good-things" }),
-      React.createElement("img", { className: "menu", src: "/images/hamburger.png", alt: "menu" })
-    )
-  );
-};
-
-/***/ }),
-/* 120 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const React = __webpack_require__(5);
-const Notification = __webpack_require__(121);
-const api = __webpack_require__(28);
-
-var NotificationButton = module.exports = React.createClass({
-  displayName: 'exports',
-
-  getInitialState: function () {
-    return {
-      enabled: false
-    };
-  },
-  componentWillMount: function () {
-    var component = this;
-    Notification.init().then(this.updateSubscriptionInfo).catch(function (err) {
-      console.log(err);
-    });
-  },
-  updateSubscriptionInfo: function (subscription) {
-    this.setState({
-      enabled: !subscription
-    });
-    if (subscription) {
-      Notification.saveSubscription(subscription);
-    }
-  },
-  handleSubscribe: function () {
-    Notification.subscribe().then(this.updateSubscriptionInfo).catch(function (err) {
-      console.log(err);
-    });
-  },
-  render: function () {
-    return React.createElement(NotificationButtonComponent, {
-      enabled: this.state.enabled,
-      subscribed: this.state.subscribed,
-      onSubscribe: this.handleSubscribe });
-  }
-});
-
-function NotificationButtonComponent(props) {
-  return props.enabled && React.createElement(
-    'footer',
+    'header',
     null,
     React.createElement(
       'div',
       { className: 'inner' },
-      'Never forget your good things',
-      React.createElement(
-        'button',
-        { type: 'button', onClick: props.onSubscribe },
-        'Enable Reminders'
-      )
+      React.createElement('img', { className: 'logo', src: '/images/logo.png', alt: 'three-good-things' }),
+      props.router.isActive('/login') || React.createElement(SettingsLink, null)
     )
+  );
+};
+
+function SettingsLink(props) {
+  return React.createElement(
+    Link,
+    { to: '/settings' },
+    React.createElement('img', { className: 'menu', src: '/images/hamburger.png', alt: 'menu' })
   );
 }
 
 /***/ }),
+/* 120 */,
 /* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const api = __webpack_require__(28);
+const dateUtil = __webpack_require__(73);
+const util = __webpack_require__(550);
 
 module.exports.init = function init() {
-  return registerServiceWorker('/service-worker.js').then(function (val) {
-    return getSubscriptionState();
+  return registerServiceWorker('/service-worker.js').then(getSubscriptionState).then(fetchSubscriptionInfoFromServer).catch(function (err) {
+    console.log(err);
+    return { subscription: null, enabled: false };
   });
 };
 
-module.exports.saveSubscription = function saveSubscription(subscription) {
-  return api.post('/subscriptions', subscription);
-};
+module.exports.saveSubscription = saveSubscription;
 
-module.exports.subscribe = function subscribe() {
+module.exports.subscribe = function subscribe(hour, timezone) {
   return navigator.serviceWorker.ready.then(function (registration) {
     return registration.pushManager.subscribe({
       userVisibleOnly: true
     });
+  }).then(function (rawPushSubscription) {
+    return saveRawSubscription(rawPushSubscription, hour, timezone);
+  });
+};
+
+module.exports.remove = function remove(subscriptionId) {
+  return api.request('/subscriptions/' + subscriptionId, 'delete').then(function (response) {
+    return response.json();
+  }).then(function (result) {
+    if (result.err) {
+      return Promise.reject(result.err);
+    }
   });
 };
 
@@ -12804,14 +12812,39 @@ function getSubscriptionState() {
   });
 }
 
-//  this may not be necessary?
-function appServerKey() {
-  var rawBytes = document.getElementById('pushServerKey').value;
-  var arr = [];
-  for (var i = 0; i < rawBytes.length; i += 2) {
-    arr.push(parseInt(rawBytes.substring(i, i + 2), 16));
-  }
-  return new Uint8Array(arr);
+function fetchSubscriptionInfoFromServer(subscription) {
+  var subscriptionInfo = util.parseEndpointAndId(subscription);
+  return api.get('/subscriptions/' + subscriptionInfo.subscriptionId).then(function (response) {
+    return response.json();
+  }).then(function (result) {
+    if (result.subscription) {
+      return { subscription: result.subscription, enabled: true };
+    } else {
+      return { subscription: null, enabled: true };
+    }
+  });
+}
+
+function saveSubscription(subscription) {
+  subscription.timezone = subscription.timezone || dateUtil.getTimezone();
+  return api.post('/subscriptions', subscription);
+};
+
+function saveRawSubscription(rawPushSubscription, hour, timezone) {
+  var authKey = rawPushSubscription.keys && rawPushSubscription.keys.auth;
+  var p256dhKey = rawPushSubscription.keys && rawPushSubscription.keys.p256dh;
+  return saveSubscription({
+    subscriptionId: rawPushSubscription.subscriptionId,
+    endpoint: rawPushSubscription.endpoint,
+    authKey: authKey,
+    p256dhKey: p256dhKey,
+    hour: hour,
+    timezone: timezone
+  }).then(function (response) {
+    return response.json();
+  }).then(function (result) {
+    return result.subscription || Promise.reject(result.err);
+  });
 }
 
 /***/ }),
@@ -23881,7 +23914,7 @@ var IndexLink = __WEBPACK_IMPORTED_MODULE_0_react___default.a.createClass({
   }
 });
 
-/* unused harmony default export */ var _unused_webpack_default_export = IndexLink;
+/* harmony default export */ __webpack_exports__["a"] = IndexLink;
 
 /***/ }),
 /* 216 */
@@ -23939,7 +23972,7 @@ var IndexRedirect = __WEBPACK_IMPORTED_MODULE_0_react___default.a.createClass({
   }
 });
 
-/* unused harmony default export */ var _unused_webpack_default_export = IndexRedirect;
+/* harmony default export */ __webpack_exports__["a"] = IndexRedirect;
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
 
 /***/ }),
@@ -24399,7 +24432,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 
 
-/* unused harmony default export */ var _unused_webpack_default_export = function () {
+/* harmony default export */ __webpack_exports__["a"] = function () {
   for (var _len = arguments.length, middlewares = Array(_len), _key = 0; _key < _len; _key++) {
     middlewares[_key] = arguments[_key];
   }
@@ -24446,7 +24479,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__createRouterHistory__ = __webpack_require__(107);
 
 
-/* unused harmony default export */ var _unused_webpack_default_export = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__createRouterHistory__["a" /* default */])(__WEBPACK_IMPORTED_MODULE_0_history_lib_createBrowserHistory___default.a);
+/* harmony default export */ __webpack_exports__["a"] = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__createRouterHistory__["a" /* default */])(__WEBPACK_IMPORTED_MODULE_0_history_lib_createBrowserHistory___default.a);
 
 /***/ }),
 /* 223 */
@@ -24829,7 +24862,7 @@ function match(_ref, callback) {
   });
 }
 
-/* unused harmony default export */ var _unused_webpack_default_export = match;
+/* harmony default export */ __webpack_exports__["a"] = match;
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
 
 /***/ }),
@@ -25106,7 +25139,7 @@ function matchRoutes(routes, location, callback, remainingPathname) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_hoist_non_react_statics___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_hoist_non_react_statics__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ContextUtils__ = __webpack_require__(65);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__PropTypes__ = __webpack_require__(66);
-/* unused harmony export default */
+/* harmony export (immutable) */ __webpack_exports__["a"] = withRouter;
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 
@@ -27292,6 +27325,7 @@ const React = __webpack_require__(5);
 const ReactDOM = __webpack_require__(116);
 const Day = __webpack_require__(114);
 const Login = __webpack_require__(115);
+const Settings = __webpack_require__(244);
 const App = __webpack_require__(113);
 const auth = __webpack_require__(43);
 const loginCheck = auth.loginCheck();
@@ -27299,18 +27333,542 @@ const loginCheck = auth.loginCheck();
 
 var root = document.getElementById('reactRoot');
 var routes = React.createElement(
-  __WEBPACK_IMPORTED_MODULE_0_react_router__["a" /* Router */],
-  { history: __WEBPACK_IMPORTED_MODULE_0_react_router__["b" /* hashHistory */] },
+  __WEBPACK_IMPORTED_MODULE_0_react_router__["Router"],
+  { history: __WEBPACK_IMPORTED_MODULE_0_react_router__["hashHistory"] },
   React.createElement(
-    __WEBPACK_IMPORTED_MODULE_0_react_router__["c" /* Route */],
+    __WEBPACK_IMPORTED_MODULE_0_react_router__["Route"],
     { path: '/', component: App },
-    React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["d" /* IndexRoute */], { component: Day, onEnter: loginCheck }),
-    React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["c" /* Route */], { path: 'day/:date(/:editIndex)', component: Day, onEnter: loginCheck }),
-    React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["c" /* Route */], { path: 'login', component: Login })
+    React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["IndexRoute"], { component: Day, onEnter: loginCheck }),
+    React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["Route"], { path: 'day/:date(/:editIndex)', component: Day, onEnter: loginCheck }),
+    React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["Route"], { path: 'settings', component: Settings, onEnter: loginCheck }),
+    React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["Route"], { path: 'login', component: Login })
   )
 );
 
 ReactDOM.render(routes, root);
+
+/***/ }),
+/* 244 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+const React = __webpack_require__(5);
+const Router = __webpack_require__(117);
+const Link = Router.Link;
+const NotificationSettings = __webpack_require__(245);
+
+const Settings = function (props) {
+  return React.createElement(
+    'div',
+    { className: 'settings inner' },
+    React.createElement(NotificationSettings, null),
+    React.createElement(
+      'div',
+      { className: 'settingsDone' },
+      React.createElement(
+        Link,
+        { className: 'button', to: '/' },
+        'Done'
+      )
+    )
+  );
+};
+
+module.exports = Settings;
+
+/***/ }),
+/* 245 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const React = __webpack_require__(5);
+const Notification = __webpack_require__(121);
+const dateUtil = __webpack_require__(73);
+const api = __webpack_require__(28);
+
+var NotificationSettings = module.exports = React.createClass({
+  displayName: 'exports',
+
+  getInitialState: function () {
+    return {
+      subscription: null,
+      enabled: true,
+      hour: 21
+    };
+  },
+  componentWillMount: function () {
+    var component = this;
+    Notification.init().then(this.updateSubscriptionStatus).catch(function (err) {
+      console.log(err);
+    });
+  },
+  updateSubscriptionStatus: function (statusInfo) {
+    this.setState(statusInfo);
+  },
+  saveSubscription: function (subscription) {
+    this.updateSubscriptionStatus({
+      subscription: subscription,
+      enabled: true
+    });
+    if (subscription) {
+      Notification.saveSubscription(subscription);
+    }
+  },
+  handleSubscribe: function (e) {
+    e.preventDefault();
+    var component = this;
+    Notification.subscribe(this.state.hour, dateUtil.getTimezone()).then(function (subscription) {
+      component.updateSubscriptionStatus({
+        subscription: subscription,
+        enabled: true
+      });
+    }).catch(function (err) {
+      console.log(err);
+    });
+  },
+  handleUpdateHour: function (e) {
+    var newHour = parseInt(e.target.value);
+    this.setState({ hour: newHour });
+    if (this.state.subscription) {
+      var subscription = this.state.subscription;
+      subscription.hour = newHour;
+      this.saveSubscription(subscription);
+    }
+  },
+  handleDeleteSubscription: function (e) {
+    e.preventDefault();
+    var component = this;
+    Notification.remove(this.state.subscription.subscriptionId).then(function () {
+      component.setState({ subscription: null });
+    }).catch(function (err) {
+      console.log(err);
+    });
+  },
+  render: function () {
+    return React.createElement(NotificationSettingsComponent, {
+      defaultHour: this.state.hour,
+      enabled: this.state.enabled,
+      subscription: this.state.subscription,
+      onUpdateHour: this.handleUpdateHour,
+      onDeleteSubscription: this.handleDeleteSubscription,
+      onSubscribe: this.handleSubscribe });
+  }
+});
+
+function NotificationSettingsComponent(props) {
+  return React.createElement(
+    'div',
+    { className: 'settingsSection' },
+    React.createElement(
+      'h3',
+      null,
+      'Notifications'
+    ),
+    React.createElement(
+      'div',
+      { className: 'setting' },
+      props.enabled || React.createElement(DisabledView, null),
+      props.enabled && props.subscription && React.createElement(SubscribedView, props),
+      props.enabled && !props.subscription && React.createElement(EnabledView, props)
+    )
+  );
+}
+
+function DisabledView(props) {
+  return React.createElement(
+    'p',
+    { className: 'deemphasized' },
+    'Sorry, notifications are not currently available for this device.'
+  );
+}
+
+function EnabledView(props) {
+  return React.createElement(
+    'div',
+    null,
+    'Receive a daily reminder on this device to record your good things?',
+    React.createElement(
+      'p',
+      { className: 'timeControls' },
+      React.createElement(TimeChooser, { current: props.defaultHour, onChange: props.onUpdateHour }),
+      React.createElement(
+        'span',
+        { className: 'timezone' },
+        dateUtil.getTimezone(),
+        ' time'
+      )
+    ),
+    React.createElement(
+      'a',
+      { className: 'button small', onClick: props.onSubscribe, href: '#' },
+      'Enable Reminders'
+    )
+  );
+}
+
+function SubscribedView(props) {
+  return React.createElement(
+    'div',
+    null,
+    'You are currently receiving daily reminders on this device at',
+    React.createElement(
+      'p',
+      { className: 'timeControls' },
+      React.createElement(TimeChooser, { current: props.subscription.hour, onChange: props.onUpdateHour }),
+      React.createElement(
+        'span',
+        { className: 'timezone' },
+        props.subscription.timezone,
+        ' time'
+      )
+    ),
+    React.createElement(
+      'a',
+      { className: 'removeSubscription', href: '#', onClick: props.onDeleteSubscription },
+      'Unsubscribe'
+    )
+  );
+}
+
+function TimeChooser(props) {
+  var hours = [];
+  for (var i = 0; i < 24; i++) {
+    hours.push(dateUtil.formatHour(i));
+  }
+  return React.createElement(
+    'select',
+    { onChange: props.onChange, defaultValue: props.current },
+    hours.map((formatted, raw) => React.createElement(
+      'option',
+      { key: raw, value: raw },
+      formatted
+    ))
+  );
+}
+
+/***/ }),
+/* 246 */,
+/* 247 */,
+/* 248 */,
+/* 249 */,
+/* 250 */,
+/* 251 */,
+/* 252 */,
+/* 253 */,
+/* 254 */,
+/* 255 */,
+/* 256 */,
+/* 257 */,
+/* 258 */,
+/* 259 */,
+/* 260 */,
+/* 261 */,
+/* 262 */,
+/* 263 */,
+/* 264 */,
+/* 265 */,
+/* 266 */,
+/* 267 */,
+/* 268 */,
+/* 269 */,
+/* 270 */,
+/* 271 */,
+/* 272 */,
+/* 273 */,
+/* 274 */,
+/* 275 */,
+/* 276 */,
+/* 277 */,
+/* 278 */,
+/* 279 */,
+/* 280 */,
+/* 281 */,
+/* 282 */,
+/* 283 */,
+/* 284 */,
+/* 285 */,
+/* 286 */,
+/* 287 */,
+/* 288 */,
+/* 289 */,
+/* 290 */,
+/* 291 */,
+/* 292 */,
+/* 293 */,
+/* 294 */,
+/* 295 */,
+/* 296 */,
+/* 297 */,
+/* 298 */,
+/* 299 */,
+/* 300 */,
+/* 301 */,
+/* 302 */,
+/* 303 */,
+/* 304 */,
+/* 305 */,
+/* 306 */,
+/* 307 */,
+/* 308 */,
+/* 309 */,
+/* 310 */,
+/* 311 */,
+/* 312 */,
+/* 313 */,
+/* 314 */,
+/* 315 */,
+/* 316 */,
+/* 317 */,
+/* 318 */,
+/* 319 */,
+/* 320 */,
+/* 321 */,
+/* 322 */,
+/* 323 */,
+/* 324 */,
+/* 325 */,
+/* 326 */,
+/* 327 */,
+/* 328 */,
+/* 329 */,
+/* 330 */,
+/* 331 */,
+/* 332 */,
+/* 333 */,
+/* 334 */,
+/* 335 */,
+/* 336 */,
+/* 337 */,
+/* 338 */,
+/* 339 */,
+/* 340 */,
+/* 341 */,
+/* 342 */,
+/* 343 */,
+/* 344 */,
+/* 345 */,
+/* 346 */,
+/* 347 */,
+/* 348 */,
+/* 349 */,
+/* 350 */,
+/* 351 */,
+/* 352 */,
+/* 353 */,
+/* 354 */,
+/* 355 */,
+/* 356 */,
+/* 357 */,
+/* 358 */,
+/* 359 */,
+/* 360 */,
+/* 361 */,
+/* 362 */,
+/* 363 */,
+/* 364 */,
+/* 365 */,
+/* 366 */,
+/* 367 */,
+/* 368 */,
+/* 369 */,
+/* 370 */,
+/* 371 */,
+/* 372 */,
+/* 373 */,
+/* 374 */,
+/* 375 */,
+/* 376 */,
+/* 377 */,
+/* 378 */,
+/* 379 */,
+/* 380 */,
+/* 381 */,
+/* 382 */,
+/* 383 */,
+/* 384 */,
+/* 385 */,
+/* 386 */,
+/* 387 */,
+/* 388 */,
+/* 389 */,
+/* 390 */,
+/* 391 */,
+/* 392 */,
+/* 393 */,
+/* 394 */,
+/* 395 */,
+/* 396 */,
+/* 397 */,
+/* 398 */,
+/* 399 */,
+/* 400 */,
+/* 401 */,
+/* 402 */,
+/* 403 */,
+/* 404 */,
+/* 405 */,
+/* 406 */,
+/* 407 */,
+/* 408 */,
+/* 409 */,
+/* 410 */,
+/* 411 */,
+/* 412 */,
+/* 413 */,
+/* 414 */,
+/* 415 */,
+/* 416 */,
+/* 417 */,
+/* 418 */,
+/* 419 */,
+/* 420 */,
+/* 421 */,
+/* 422 */,
+/* 423 */,
+/* 424 */,
+/* 425 */,
+/* 426 */,
+/* 427 */,
+/* 428 */,
+/* 429 */,
+/* 430 */,
+/* 431 */,
+/* 432 */,
+/* 433 */,
+/* 434 */,
+/* 435 */,
+/* 436 */,
+/* 437 */,
+/* 438 */,
+/* 439 */,
+/* 440 */,
+/* 441 */,
+/* 442 */,
+/* 443 */,
+/* 444 */,
+/* 445 */,
+/* 446 */,
+/* 447 */,
+/* 448 */,
+/* 449 */,
+/* 450 */,
+/* 451 */,
+/* 452 */,
+/* 453 */,
+/* 454 */,
+/* 455 */,
+/* 456 */,
+/* 457 */,
+/* 458 */,
+/* 459 */,
+/* 460 */,
+/* 461 */,
+/* 462 */,
+/* 463 */,
+/* 464 */,
+/* 465 */,
+/* 466 */,
+/* 467 */,
+/* 468 */,
+/* 469 */,
+/* 470 */,
+/* 471 */,
+/* 472 */,
+/* 473 */,
+/* 474 */,
+/* 475 */,
+/* 476 */,
+/* 477 */,
+/* 478 */,
+/* 479 */,
+/* 480 */,
+/* 481 */,
+/* 482 */,
+/* 483 */,
+/* 484 */,
+/* 485 */,
+/* 486 */,
+/* 487 */,
+/* 488 */,
+/* 489 */,
+/* 490 */,
+/* 491 */,
+/* 492 */,
+/* 493 */,
+/* 494 */,
+/* 495 */,
+/* 496 */,
+/* 497 */,
+/* 498 */,
+/* 499 */,
+/* 500 */,
+/* 501 */,
+/* 502 */,
+/* 503 */,
+/* 504 */,
+/* 505 */,
+/* 506 */,
+/* 507 */,
+/* 508 */,
+/* 509 */,
+/* 510 */,
+/* 511 */,
+/* 512 */,
+/* 513 */,
+/* 514 */,
+/* 515 */,
+/* 516 */,
+/* 517 */,
+/* 518 */,
+/* 519 */,
+/* 520 */,
+/* 521 */,
+/* 522 */,
+/* 523 */,
+/* 524 */,
+/* 525 */,
+/* 526 */,
+/* 527 */,
+/* 528 */,
+/* 529 */,
+/* 530 */,
+/* 531 */,
+/* 532 */,
+/* 533 */,
+/* 534 */,
+/* 535 */,
+/* 536 */,
+/* 537 */,
+/* 538 */,
+/* 539 */,
+/* 540 */,
+/* 541 */,
+/* 542 */,
+/* 543 */,
+/* 544 */,
+/* 545 */,
+/* 546 */,
+/* 547 */,
+/* 548 */,
+/* 549 */,
+/* 550 */
+/***/ (function(module, exports) {
+
+module.exports.parseEndpointAndId = function parseEndpointAndId(subscriptionInfo) {
+  var endpoint = subscriptionInfo.endpoint;
+  var subscriptionId = subscriptionInfo.subscriptionId;
+  
+  //  handle some different formats of GCM endpoints to make sure we
+  //  always have the subscriptionId in the endpoint, and as its own value
+  if (subscriptionId && endpoint.indexOf(subscriptionId) === -1) {
+    endpoint += '/' + subscriptionId;
+  }
+  if (!subscriptionId) {
+    var pieces = endpoint.split('/');
+    subscriptionId = pieces[pieces.length - 1];
+  }
+  return { endpoint: endpoint, subscriptionId: subscriptionId };
+};
+
 
 /***/ })
 /******/ ]);

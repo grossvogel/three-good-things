@@ -4,7 +4,7 @@ const Header = require('./header');
 module.exports = function App(props) {
   return (
     <div className="app">
-      <Header/>
+      <Header router={props.router}/>
       <section className="main">
         {props.children}
       </section>

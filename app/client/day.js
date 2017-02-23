@@ -1,9 +1,10 @@
 const React = require('react');
+const Router = require('react-router');
 const auth = require('./auth');
 const dateUtil = require('../date');
 const api = require('./api');
 const GoodThing = require('./good-thing');
-const NotificationButton = require('./notification-button');
+const Link = Router.Link;
 
 var Day = module.exports = React.createClass({
   getInitialState: function() {
@@ -28,19 +29,7 @@ var Day = module.exports = React.createClass({
       editIndex: index
     });
   },
-  handleNav: function(e) {
-    e.preventDefault();
-    var newDate;
-    if (e.target.getAttribute('href') == '#next') {
-      newDate = dateUtil.nextDay(this.state.date);
-    } else {
-      newDate = dateUtil.previousDay(this.state.date);
-    }
-    var dest = '/day/' + dateUtil.stringify(newDate);
-    this.props.router.push(dest);
-  },
   componentWillReceiveProps: function(nextProps) {
-    console.log(nextProps.params);
     [ date, today ] = extractDate(nextProps.params.date);
     this.setState({
       date: date,
@@ -64,7 +53,6 @@ var Day = module.exports = React.createClass({
       today={this.state.today}
       date={this.state.date}
       editIndex={this.state.editIndex}
-      onNav={this.handleNav}
       onUpdateGoodThing={this.handleUpdateGoodThing}
       onEditGoodThing={this.handleEditGoodThing}
       goodThings={this.state.goodThings}/>;
@@ -72,13 +60,15 @@ var Day = module.exports = React.createClass({
 });
 
 function DayComponent(props) {
+  var nextDay = dateUtil.stringify(dateUtil.nextDay(props.date));
+  var prevDay = dateUtil.stringify(dateUtil.previousDay(props.date));
   return (
     <div className="day">
       <div className="nav">
         <div className="inner">
-          <a href="#prev" className="prev" onClick={props.onNav}>Prev</a>
+          <Link to={'/day/' + prevDay} className="prev"><span>Previous Day</span></Link>
           {(props.today && 'Today') || dateUtil.niceFormat(props.date)}
-          { props.today || <a href="#next" className="next" onClick={props.onNav}>Next</a> }
+          { props.today || <Link to={'/day/' + nextDay} className="next"><span>Next Day</span></Link> }
         </div>
       </div>
       <ul className="inner">
@@ -92,7 +82,6 @@ function DayComponent(props) {
             key={goodThing.id || goodThing.key}/>
         ))}
       </ul>
-	  <NotificationButton/>
     </div>
   );
 }

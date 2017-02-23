@@ -76,7 +76,6 @@ module.exports.requireUser = function(req, res, next) {
     res.status(401);
     res.json({ err: 'Authentication Required' });
   } else {
-    console.log(req.user.id);
     next();
   }
 };

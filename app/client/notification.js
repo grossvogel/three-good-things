@@ -1,20 +1,36 @@
 const api = require('./api');
+const dateUtil = require('../date');
+const util = require('../util');
 
 module.exports.init = function init() {
-  return registerServiceWorker('/service-worker.js').then(function(val) {
-    return getSubscriptionState();
+  return registerServiceWorker('/service-worker.js')
+  .then(getSubscriptionState)
+  .then(fetchSubscriptionInfoFromServer)
+  .catch(function(err) {
+    console.log(err);
+    return { subscription: null, enabled: false };
   });
 };
 
-module.exports.saveSubscription = function saveSubscription(subscription) {
-  return api.post('/subscriptions', subscription);
-};
+module.exports.saveSubscription = saveSubscription;
 
-module.exports.subscribe = function subscribe() {
+module.exports.subscribe = function subscribe(hour, timezone) {
   return navigator.serviceWorker.ready.then(function(registration) {
     return registration.pushManager.subscribe({
       userVisibleOnly: true
     });
+  }).then(function (rawPushSubscription) {
+    return saveRawSubscription(rawPushSubscription, hour, timezone);
+  });
+};
+
+module.exports.remove = function remove(subscriptionId) {
+  return api.request('/subscriptions/' + subscriptionId, 'delete').then(function(response) {
+    return response.json();
+  }).then(function(result) {
+    if(result.err) {
+      return Promise.reject(result.err);
+    }
   });
 };
 
@@ -46,12 +62,37 @@ function getSubscriptionState() {
   });
 }
 
-//  this may not be necessary?
-function appServerKey() {
-  var rawBytes = document.getElementById('pushServerKey').value;
-  var arr = [];
-  for (var i = 0; i < rawBytes.length; i += 2) {
-    arr.push(parseInt(rawBytes.substring(i, i + 2), 16));
-  }
-  return new Uint8Array(arr);
+function fetchSubscriptionInfoFromServer(subscription) {
+  var subscriptionInfo = util.parseEndpointAndId(subscription);
+  return api.get('/subscriptions/' + subscriptionInfo.subscriptionId).then(function(response) {
+    return response.json();
+  }).then(function(result) {
+    if (result.subscription) {
+      return { subscription: result.subscription, enabled: true };
+    } else {
+      return { subscription: null, enabled: true };
+    }
+  });
+}
+
+function saveSubscription(subscription) {
+  subscription.timezone = subscription.timezone || dateUtil.getTimezone();
+  return api.post('/subscriptions', subscription);
+};
+
+function saveRawSubscription(rawPushSubscription, hour, timezone) {
+  var authKey = rawPushSubscription.keys && rawPushSubscription.keys.auth;
+  var p256dhKey = rawPushSubscription.keys && rawPushSubscription.keys.p256dh;
+  return saveSubscription({
+    subscriptionId: rawPushSubscription.subscriptionId,
+    endpoint: rawPushSubscription.endpoint,
+    authKey: authKey,
+    p256dhKey: p256dhKey,
+    hour: hour,
+    timezone: timezone
+  }).then(function(response) {
+    return response.json();
+  }).then(function(result) {
+    return result.subscription || Promise.reject(result.err);
+  });
 }

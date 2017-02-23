@@ -13,6 +13,14 @@ module.exports.get = function get(endpoint) {
   }));
 };
 
+module.exports.request = request;
+
+function request(endpoint, method, options) {
+  options = options || {};
+  options.method = method || 'get';
+  return fetch(endpoint, getOptions(options));
+};
+
 const defaults = {
   method: 'post',
   credentials: 'include',

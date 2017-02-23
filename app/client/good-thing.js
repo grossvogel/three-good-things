@@ -58,8 +58,7 @@ function GoodThingComponent(props) {
         <div className="number">{props.number}</div>
         <form onSubmit={props.onSubmit}>
           <InputRow placeholder="what good thing happened today?"
-            autoFocus={true} value={props.title}
-             onChange={props.onUpdateTitle}/>
+            value={props.title} onChange={props.onUpdateTitle}/>
           <div className="input-row">
             <textarea placeholder="More details..." value={props.details}
               onChange={props.onUpdateDetails}/>

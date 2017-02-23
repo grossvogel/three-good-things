@@ -8,9 +8,10 @@ $color_accent_3:#F9F2F5;  //  pale / light
 */
 
 //	blue
+$color_accent_0:#1AAAD7;
 $color_accent_1:#38B4DB;  //  bold / dark
 $color_accent_2:#66CCEC;
-$color_accent_3:#F2F8F9;  //  pale / light
+$color_accent_3:#F4F8F9;  //  pale / light
 $color_gray_1:#7E898C;
 
 @mixin shadow{
@@ -18,6 +19,22 @@ $color_gray_1:#7E898C;
 }
 @mixin rounded{
   border-radius: 4px;
+}
+@mixin left-arrow($size, $color) {
+  width:0;
+  height:0;
+  border-top: $size solid transparent;
+  border-bottom: $size solid transparent;
+  border-right: ($size * 1.4) solid $color;
+  span{ display:none; }
+}
+@mixin right-arrow($size, $color) {
+  width:0;
+  height:0;
+  border-top: $size solid transparent;
+  border-bottom: $size solid transparent;
+  border-left: ($size * 1.4) solid $color;
+  span{ display:none; }
 }
 
 $header-height:4rem;
@@ -66,8 +83,24 @@ section.main{
 }
 
 h1{
-  font-size:1.3rem;
+  font-size:1.6rem;
 }
+h2{
+  font-size:1.3rem;
+  opacity: 0.8;
+}
+h3{
+  font-weight:normal;
+  text-transform:uppercase;
+  border-bottom:1px solid $color-text;
+}
+a{
+  color:$color_accent_0;
+  &:hover, &:active{
+    color:darken($color_accent_0, 10%);
+  }
+}
+
 
 .input-row{
   margin-bottom:$padding;
@@ -97,17 +130,26 @@ h1{
     font-size:1rem;
   }
 }
+select{
+  font-size:1.2rem;
+}
 button, .button{
   background:linear-gradient(to bottom, lighten($color_accent_1, 3%), darken($color_accent_1, 1%));
   color:#fff;
   font-size:1.3rem;
   padding: (0.5 * $padding) $padding;
   border:0;
+  text-decoration:none;
   @include shadow;
   @include rounded;
-  &:hover{
+  &:hover, &:active{
     background:darken($color_accent_1, 5%);
     box-shadow:none;
+    color:#fff;
+  }
+  &.small{
+    font-size:1rem;
+    padding: (0.2 * $padding) (0.5 * $padding);
   }
 }
 .error{
@@ -137,7 +179,18 @@ header{
     margin-left: 2rem;
   }
   .google{
+    margin-top: $padding * 2;
+    .or{
+      margin-bottom: $padding * 2;
+      font-size:1.3rem;
+      opacity: 0.8;
+    }
+  }
+  .blurb{
     margin-top: $padding * 4;
+  }
+  .googleButton{
+    max-height:50px;
   }
 }
 
@@ -184,19 +237,41 @@ header{
   text-transform:uppercase;
   text-align:center;
   padding: 0.5rem 0;
-  font-size:1.1rem;
+  font-size:1.2rem;
   .inner{
     position:relative;
     text-align:center;
     .prev{
       position:absolute;
       top: 0;
-      left: $padding;
+      left: $padding * 1.1;
+      @include left-arrow(12px, $color_accent_3);
     }
     .next{
       position:absolute;
       top: 0;
-      right: $padding;
+      right: $padding * 1.1;
+      @include right-arrow(12px, $color_accent_3);
     }
   }
+}
+
+.settingsSection{
+  margin: 1rem 0 2rem 0;
+  position:relative;
+
+  .timezone{
+    opacity:0.8;
+    margin-left:1rem;
+    font-size:0.9rem;
+  }
+  .removeSubscription{
+    position:absolute;
+    bottom: 0;
+    right: 0;
+    font-size:0.9rem;
+  }
+}
+.settingsDone{
+  margin-top: 4rem;
 }

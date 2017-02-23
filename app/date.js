@@ -1,3 +1,5 @@
+const DAYS = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
+
 module.exports.extract = function extract(date, local) {
   if(!date) return null;
 
@@ -46,6 +48,20 @@ module.exports.previousDay = function previousDay(date) {
   return prev;
 };
 
+module.exports.getTimezone = function getTimezone() {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+};
+
+module.exports.formatHour = function formatHour(intHour) {
+  if (intHour == 0) {
+    return '12 AM';
+  } else if (intHour > 12) {
+    return '' + (intHour - 12) + ' PM';
+  } else {
+    return intHour + ' AM';
+  }
+};
+
 module.exports.getHourInTimezone = function getHourInTimezone(date, timezone) {
   return applyDateFormat(date, {
     timeZone: timezone,
@@ -63,9 +79,8 @@ module.exports.getDateInTimezone = function getDateInTimezone(date, timezone) {
   return new Date(Date.UTC(year, month - 1, day));
 };
 
-const DAYS = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
-
 function applyDateFormat(date, options) {
   var formatter = new Intl.DateTimeFormat(['en-us'], options);
   return formatter.format(date);
 }
+

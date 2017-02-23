@@ -3,6 +3,7 @@ const config = require('../config');
 const dateUtil = appRequire('date');
 const ReminderSubscription = appRequire('model/reminder-subscription');
 const goodThings = appRequire('good-things');
+const util = appRequire('util');
 
 module.exports.save = function(req, res, _next) {
   const subscription = extractSubscription(req);
@@ -10,6 +11,24 @@ module.exports.save = function(req, res, _next) {
     res.json({ err: null, subscription: sub});
   }).catch(function(err) {
     res.json({ err: err, subscription: null});
+  });
+};
+
+module.exports.get = function(req, res, _next) {
+  const subscriptionId = req.params.subscriptionId;
+  findSubscription(req.user, subscriptionId).then(function(subscription) {
+    res.json({ err: null, subscription: subscription});
+  }).catch(function(err) {
+    res.json({ err: err, subscription: null });
+  });
+};
+
+module.exports.remove = function(req, res, _next) {
+  const subscriptionId = req.params.subscriptionId;
+  removeSubscription(req.user, subscriptionId).then(function() {
+    res.json({err: null});
+  }).catch(function(err) {
+    res.json({err: err});
   });
 };
 
@@ -29,38 +48,29 @@ module.exports.remindAll = function remindAll(ignoreTime) {
 };
 
 function extractSubscription(req) {
-  var endpoint = req.body.endpoint;
-  var subscriptionId = req.body.subscriptionId;
-  
-  //  handle some different formats of GCM endpoints to make sure we
-  //  always have the subscriptionId in the endpoint, and as its own value
-  if (endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0) {
-    if (subscriptionId && endpoint.indexOf(subscriptionId) === -1) {
-      endpoint += '/' + subscriptionId;
-    }
-    if (!subscriptionId) {
-      var pieces = endpoint.split('/');
-      subscriptionId = pieces[pieces.length - 1];
-    }
-  }
+  var { endpoint, subscriptionId } = util.parseEndpointAndId (req.body);
 
-  return {
+  var subscription = {
     endpoint: endpoint,
     subscriptionId: subscriptionId,
-    authKey: req.body.keys.auth,
-    p256dhKey: req.body.keys.p256dh,
     timezone: req.body.timezone || 'America/Chicago',
     hour: req.body.hour || 18,
   };
+  if (req.body.p256dhKey) {
+    subscription.p256dhKey = req.body.p256dhKey;
+  }
+  if (req.body.authKey) {
+    subscription.authKey = req.body.authKey;
+  }
+  return subscription;
 }
 
 function saveSubscription(user, subscription) {
-  var query = ReminderSubscription.findOne({ user: user })
+  var query = findSubscription(user, subscription.subscriptionId);
   return query.then(function(existing) {
     if (!existing) return Promise.reject();
 
     existing.endpoint = subscription.endpoint;
-    existing.subscriptionId = subscription.subscriptionId;
     existing.timezone = subscription.timezone;
     existing.hour = subscription.hour;
     existing.authKey = subscription.authKey;
@@ -70,6 +80,20 @@ function saveSubscription(user, subscription) {
     subscription.user = user;
     var newSub = new ReminderSubscription(subscription);
     return newSub.save();
+  });
+}
+
+function findSubscription(user, subscriptionId) {
+  return ReminderSubscription.findOne({
+    user: user,
+    subscriptionId: subscriptionId
+  });
+}
+
+function removeSubscription(user, subscriptionId) {
+  return ReminderSubscription.remove({
+    user: user,
+    subscriptionId: subscriptionId
   });
 }
 
