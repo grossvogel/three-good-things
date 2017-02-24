@@ -4,13 +4,14 @@ const auth = require('./auth');
 const dateUtil = require('../date');
 const api = require('./api');
 const GoodThing = require('./good-thing');
+const Loading = require('./loading');
 const Link = Router.Link;
 
 var Day = module.exports = React.createClass({
   getInitialState: function() {
     [ date, today ] = extractDate(this.props.params.date);
     return {
-      loaded: false,
+      loading: true,
       date: date,
       goodThings: [],
       today: today,
@@ -32,23 +33,28 @@ var Day = module.exports = React.createClass({
   componentWillReceiveProps: function(nextProps) {
     [ date, today ] = extractDate(nextProps.params.date);
     this.setState({
-      date: date,
-      today: today,
-      editIndex: null
-    });
-    this.loadData();
+		date: date,
+		today: today,
+		loading: true,
+      	editIndex: extractEditIndex(nextProps.params.editIndex)
+	}, function() {
+    	this.loadData();
+	});
   },
   loadData: function() {
     var component = this;
     loadGoodThings(this.state.date, this.state.today, this.state.editIndex).then(function({goodThings, editIndex}) {
       component.setState({
-        loaded: true,
+        loading: false,
         goodThings: goodThings,
         editIndex: editIndex
       });
     });
   },
   render: function() {
+    if(this.state.loading) {
+      return <Loading/>;
+    }
     return <DayComponent
       today={this.state.today}
       date={this.state.date}

@@ -109,6 +109,11 @@ button, .button {
   padding: 1rem;
   text-align: left; }
 
+.loader {
+  text-align: center; }
+  .loader img {
+    max-width: 300px; }
+
 header .logo {
   position: absolute;
   top: 1rem;

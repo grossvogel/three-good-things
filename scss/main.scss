@@ -158,6 +158,12 @@ button, .button{
   padding: $padding;
   text-align: left;
 }
+.loader{
+  text-align:center;
+  img{
+    max-width:300px;
+  }
+}
 
 header{
   .logo{

@@ -1,10 +1,12 @@
 const React = require('react');
 const auth = require('./auth');
 const InputRow = require('./input-row');
+const Loading = require('./loading');
 
 const Login = React.createClass({
   getInitialState: function() {
     return {
+      loading: true,
       username: '',
       password: '',
       loginInProgress: false,
@@ -21,6 +23,10 @@ const Login = React.createClass({
         if (user) {
           auth.updateUser(user);
           component.completeLogin();
+        } else {
+          component.setState({
+            loading: false
+          });
         }
       }).catch(function(err) {
         console.log(err);
@@ -73,13 +79,17 @@ const Login = React.createClass({
     });
   },
   render: function() {
+    if(this.state.loading) {
+      return <Loading/>;
+    } else if (this.state.loginInProgress) {
+      return <div className="loading">Login in progress...</div>;
+    }
     return (
       <LoginComponent
         username={this.state.username}
         password={this.state.password}
         newAccount={this.state.newAccount}
         error={this.state.error}
-        loginInProgress={this.state.loginInProgress}
         onSubmit={this.handleSubmission}
         onToggleView={this.handleToggleView}
         onUpdateUsername={this.handleUpdateUsername}
@@ -93,10 +103,8 @@ function LoginComponent(props) {
   var title = props.newAccount ? 'Create your account to begin' : 'Sign in to your account';
   var toggle = props.newAccount ? '(sign in)' : '(create an account)';
   var buttonText = props.newAccount ? 'Create Account' : 'Sign In';
-  if(props.loginInProgress) {
-    inner = <div className="loading">Please wait while we initiate your login...</div>;
-  } else {
-    inner = (
+  return (
+    <div className="inner loginContainer">
       <form onSubmit={props.onSubmit}>
         { props.error && <div className="error">Sorry, your credientials could not be verified.<br/>Please try again.</div>}
         <h1>
@@ -117,11 +125,6 @@ function LoginComponent(props) {
           </a>
         </div>
       </form>
-    );
-  }
-  return (
-    <div className="inner loginContainer">
-      {inner}
       <div className="blurb">
         <h2>What is this all about?</h2>
         <p>

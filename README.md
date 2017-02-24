@@ -2,6 +2,8 @@
 
 ### TODO
 
+* Test new transition code for moving between days
+* Loading states
 * Client-side form validation
 * Server-side validation... in the model & elsewhere?
 * Image upload w/ device camera support
