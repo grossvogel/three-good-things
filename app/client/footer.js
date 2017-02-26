@@ -1,12 +1,12 @@
-const React = require('react');
+const React = require('react')
 
-module.exports = function Footer(_props) {
+module.exports = function Footer (_props) {
   return (
     <footer>
-      <div className="inner">
+      <div className='inner'>
         &nbsp;
       </div>
     </footer>
-  );
-};
+  )
+}
 
