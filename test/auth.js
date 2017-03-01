@@ -7,13 +7,11 @@ util.db(util.config)
 describe('Authorization', function () {
   describe('Password Auth', function () {
     before(function (done) {
-      util.dropCollection('users', function () {
-        util.dropCollection('identities', done)
-      })
+      util.dropCollection(['users', 'identities'], done)
     })
 
     it('fails for nonexistent user', function (done) {
-      auth.passwordLogin('henry_user', 'password', function (_err, user) {
+      auth._passwordLogin('henry_user', 'password', function (_err, user) {
         assert(!user)
         done()
       })
@@ -22,13 +20,13 @@ describe('Authorization', function () {
     it('creates a new user with pw credential', function (done) {
       var username = 'bobby'
       var rawPW = 'aeoifa8caw098e'
-      auth.createUserWithPassword(username, rawPW).then(function (user) {
+      auth._createUserWithPassword(username, rawPW).then(function (user) {
         assert(user)
         assert.equal(user.username, username)
         return user.id
       }).then(function (userId) {
         return new Promise(function (resolve, reject) {
-          auth.passwordLogin(username, rawPW, function (_err, user) {
+          auth._passwordLogin(username, rawPW, function (_err, user) {
             assert(user)
             assert.equal(user.id, userId)
             resolve()
@@ -54,13 +52,13 @@ describe('Authorization', function () {
         id: '123'
       }
       new Promise(function (resolve, reject) {
-        auth.googleLogin('accessToken', 'refreshToken', profile, function (_err, user) {
+        auth._googleLogin('accessToken', 'refreshToken', profile, function (_err, user) {
           assert(user)
           assert.equal(user.username, profile.displayName)
           resolve(user)
         })
       }).then(function (newUser) {
-        auth.googleLogin('accessToken', 'refreshToken', profile, function (_err, user) {
+        auth._googleLogin('accessToken', 'refreshToken', profile, function (_err, user) {
           assert(user)
           assert.equal(user.username, profile.displayName)
           assert.equal(user.id, newUser.id)

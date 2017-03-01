@@ -1,31 +1,36 @@
 const dateUtil = appRequire('date')
 const GoodThing = appRequire('model/good-thing.js')
 
-module.exports.day = function (req, res, _next) {
+module.exports = {
+  day,
+  update,
+  fetchDay
+}
+
+function day (req, res, _next) {
   var date = dateUtil.extract(req.params.date)
   getGoodThings(req.user, date, res)
 }
 
-module.exports.update = function (req, res, _next) {
+function update (req, res, _next) {
   saveGoodThing(req.user, req, res)
 }
 
-module.exports.fetchDay = function (user, date) {
-  return dayQuery(user, date)
-}
-
-function getGoodThings (user, date, res) {
-  dayQuery(user, date).then(function (goodThings) {
-    res.json({err: null, goodThings: goodThings})
-  }).catch(function (err) {
-    res.json({err: err, goodThings: []})
-  })
-}
-function dayQuery (user, date) {
+function fetchDay (user, date) {
   return GoodThing.find({
     user: user,
     day: date
   }).sort('created_at').exec()
+}
+
+//  private helpers
+
+function getGoodThings (user, date, res) {
+  fetchDay(user, date).then(function (goodThings) {
+    res.json({err: null, goodThings: goodThings})
+  }).catch(function (err) {
+    res.json({err: err, goodThings: []})
+  })
 }
 
 function saveGoodThing (user, req, res) {
@@ -34,9 +39,10 @@ function saveGoodThing (user, req, res) {
     ? updateGoodThing(params)
     : newGoodThing(params)
   save.then(function (goodThing) {
-    res.json({err: null, goodThing: goodThing})
+    res.status(params.id ? 200 : 201)
+      .json({err: null, goodThing: goodThing})
   }).catch(function (err) {
-    res.json({err: err, goodThing: null})
+    res.status(500).json({err: err, goodThing: null})
   })
 }
 function extractGoodThingParams (user, req) {

@@ -3,36 +3,47 @@ const config = require('../config')
 const dateUtil = appRequire('date')
 const ReminderSubscription = appRequire('model/reminder-subscription')
 const goodThings = appRequire('good-things')
-const util = appRequire('util')
 
-module.exports.save = function save (req, res, _next) {
+module.exports = {
+  save,
+  get,
+  remove,
+  remindAll
+}
+
+function save (req, res, _next) {
   const subscription = extractSubscription(req)
-  saveSubscription(req.user, subscription).then(function (sub) {
-    res.json({err: null, subscription: sub})
+  saveSubscription(req.user, subscription).then(function (subInfo) {
+    res.status(subInfo.new ? 201 : 200)
+      .json({err: null, subscription: subInfo.subscription})
   }).catch(function (err) {
     res.json({err: err, subscription: null})
   })
 }
 
-module.exports.get = function get (req, res, _next) {
+function get (req, res, _next) {
   const subscriptionId = req.params.subscriptionId
   findSubscription(req.user, subscriptionId).then(function (subscription) {
-    res.json({err: null, subscription: subscription})
+    if (subscription) {
+      res.json({err: null, subscription: subscription})
+    } else {
+      return Promise.reject('Not Found')
+    }
   }).catch(function (err) {
-    res.json({err: err, subscription: null})
+    res.status(404).json({err: err, subscription: null})
   })
 }
 
-module.exports.remove = function remove (req, res, _next) {
+function remove (req, res, _next) {
   const subscriptionId = req.params.subscriptionId
   removeSubscription(req.user, subscriptionId).then(function () {
-    res.json({err: null})
+    res.status(202).json({err: null})
   }).catch(function (err) {
     res.json({err: err})
   })
 }
 
-module.exports.remindAll = function remindAll (ignoreTime) {
+function remindAll (ignoreTime) {
   var now = new Date()
   return ReminderSubscription.find().then(function (subscriptions) {
     var requests = []
@@ -49,12 +60,12 @@ module.exports.remindAll = function remindAll (ignoreTime) {
   })
 }
 
-function extractSubscription (req) {
-  var {endpoint, subscriptionId} = util.parseEndpointAndId(req.body)
+//  private helpers
 
+function extractSubscription (req) {
   var subscription = {
-    endpoint: endpoint,
-    subscriptionId: subscriptionId,
+    endpoint: req.body.endpoint,
+    subscriptionId: req.body.subscriptionId,
     timezone: req.body.timezone || 'America/Chicago',
     hour: req.body.hour || 18
   }
@@ -68,7 +79,8 @@ function extractSubscription (req) {
 }
 
 function saveSubscription (user, subscription) {
-  var query = findSubscription(user, subscription.subscriptionId)
+  let newSub
+  let query = findSubscription(user, subscription.subscriptionId)
   return query.then(function (existing) {
     if (!existing) return Promise.reject()
 
@@ -80,8 +92,10 @@ function saveSubscription (user, subscription) {
     return existing.save()
   }).catch(function () {
     subscription.user = user
-    var newSub = new ReminderSubscription(subscription)
+    newSub = new ReminderSubscription(subscription)
     return newSub.save()
+  }).then(function (subscription) {
+    return {subscription: subscription, 'new': !!newSub}
   })
 }
 

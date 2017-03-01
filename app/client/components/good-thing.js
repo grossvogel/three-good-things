@@ -1,6 +1,6 @@
 const React = require('react')
-const api = require('./api')
-const dateUtil = require('../date')
+const api = require('../api')
+const dateUtil = require('../../date')
 const InputRow = require('./input-row')
 
 module.exports = React.createClass({
@@ -80,9 +80,7 @@ function GoodThingComponent (props) {
 
 function saveGoodThing (data) {
   data.day = dateUtil.stringify(data.day)
-  return api.post('/good-things', data).then(function (response) {
-    return response.json()
-  }).then(function (result) {
+  return api.post('/good-things', data).then(function (result) {
     return result.goodThing
   })
 }

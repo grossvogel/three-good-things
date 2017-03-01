@@ -1,3 +1,4 @@
+'use strict'
 const express = require('express')
 const path = require('path')
 const favicon = require('serve-favicon')
@@ -37,7 +38,7 @@ app.use(auth.loadUserFromSession)
 
 // misc setup
 app.use(favicon(path.join(__dirname, 'public', 'favicon.png')))
-app.use(logger('dev'))
+if (config.env !== 'test') app.use(logger('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())

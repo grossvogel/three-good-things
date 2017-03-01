@@ -1,6 +1,6 @@
 const React = require('react')
-const Notification = require('./notification')
-const dateUtil = require('../date')
+const subscriptions = require('../subscriptions')
+const dateUtil = require('../../date')
 
 module.exports = React.createClass({
   getInitialState: function () {
@@ -11,7 +11,7 @@ module.exports = React.createClass({
     }
   },
   componentWillMount: function () {
-    Notification.init()
+    subscriptions.init()
     .then(this.updateSubscriptionStatus)
     .catch(function (err) {
       console.log(err)
@@ -26,13 +26,13 @@ module.exports = React.createClass({
       enabled: true
     })
     if (subscription) {
-      Notification.saveSubscription(subscription)
+      subscriptions.saveSubscription(subscription)
     }
   },
   handleSubscribe: function (e) {
     e.preventDefault()
     var component = this
-    Notification.subscribe(this.state.hour, dateUtil.getTimezone())
+    subscriptions.subscribe(this.state.hour, dateUtil.getTimezone())
     .then(function (subscription) {
       component.updateSubscriptionStatus({
         subscription: subscription,
@@ -54,7 +54,7 @@ module.exports = React.createClass({
   handleDeleteSubscription: function (e) {
     e.preventDefault()
     var component = this
-    Notification.remove(this.state.subscription.subscriptionId).then(function () {
+    subscriptions.remove(this.state.subscription.subscriptionId).then(function () {
       component.setState({ subscription: null })
     }).catch(function (err) {
       console.log(err)

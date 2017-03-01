@@ -9,8 +9,19 @@ global.appRequire = function (name) {
 module.exports = {
   config: require('../config'),
   db: appRequire('db'),
-  dropCollection: function (collection, done) {
-    mongoose.connection.collections[collection].drop(function (_err) {
+  dropCollection: function (collections, done) {
+    if (collections.constructor !== Array) {
+      collections = [collections]
+    }
+    let promises = []
+    for (let i = 0; i < collections.length; i++) {
+      promises.push(new Promise(function (resolve, reject) {
+        mongoose.connection.collections[collections[i]].drop(function () {
+          resolve()
+        })
+      }))
+    }
+    Promise.all(promises).then(function () {
       done()
     })
   }

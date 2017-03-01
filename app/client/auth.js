@@ -1,8 +1,10 @@
 const api = require('./api')
 
+//  private singleton state
 var user = null
 var nextPathname = null
-const auth = {
+
+module.exports = {
   currentUser: function () {
     return user
   },
@@ -18,7 +20,7 @@ const auth = {
         nextPathname = nextState.location.pathname
         replace({ pathname: '/login' })
       }
-    }.bind(auth)
+    }.bind(this)
   },
   nextPathname: function () {
     var tmp = nextPathname
@@ -26,18 +28,14 @@ const auth = {
     return tmp
   },
   checkSession: function () {
-    return api.get('/auth/me').then(function (response) {
-      return response.json()
-    }).then(function (result) {
+    return api.get('/auth/me').then(function (result) {
       return result.user
     })
   },
   signupOrLogin: function (username, password, newAccount) {
     var endpoint = newAccount ? '/auth/signup' : '/auth/login'
     var data = {username: username, password: password}
-    return api.post(endpoint, data).then(function (response) {
-      return response.json()
-    }).then(function (result) {
+    return api.post(endpoint, data).then(function (result) {
       return result.user
     }).catch(function (err) {
       console.log(err)
@@ -46,4 +44,3 @@ const auth = {
   }
 }
 
-module.exports = auth

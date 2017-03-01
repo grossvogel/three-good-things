@@ -2,9 +2,11 @@
 var assert = require('assert')
 var util = require('./util.js')
 var User = appRequire('model/user')
-util.db(util.config)
 
-describe('New User', function () {
+describe('User', function () {
+  before(function () {
+    util.db(util.config)
+  })
   beforeEach(function (done) {
     util.dropCollection('users', done)
   })

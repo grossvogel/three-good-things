@@ -1,9 +1,9 @@
 const React = require('react')
 const ReactDOM = require('react-dom')
-const Day = require('./day')
-const Login = require('./login')
-const Settings = require('./settings')
-const App = require('./app')
+const Day = require('./components/day')
+const Login = require('./components/login')
+const Settings = require('./components/settings')
+const App = require('./components/app')
 const auth = require('./auth')
 const loginCheck = auth.loginCheck()
 import { Router, Route, hashHistory, IndexRoute } from 'react-router'

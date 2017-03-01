@@ -1,6 +1,7 @@
 const envs = [ 'development', 'production', 'test' ]
 const config = {}
 const defaults = {
+  env: process.env.NODE_ENV,
   base_url: process.env.BASE_URL,
   session_secret: process.env.SESSION_SECRET,
   session_duration: 24 * 30 * (60 * 60 * 1000),

@@ -1,7 +1,7 @@
 const React = require('react')
 const Router = require('react-router')
-const dateUtil = require('../date')
-const api = require('./api')
+const dateUtil = require('../../date')
+const api = require('../api')
 const GoodThing = require('./good-thing')
 const Loading = require('./loading')
 const Link = Router.Link
@@ -99,9 +99,7 @@ function extractDate (initial) {
 
 function loadGoodThings (date, today, editIndex) {
   var call = api.get('/good-things/' + dateUtil.stringify(date))
-  return call.then(function (response) {
-    return response.json()
-  }).then(function (result) {
+  return call.then(function (result) {
     return result.goodThings
   }).catch(function (err) {
     console.log(err)

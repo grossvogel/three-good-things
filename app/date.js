@@ -1,6 +1,19 @@
+module.exports = {
+  extract,
+  today,
+  stringify,
+  niceFormat,
+  nextDay,
+  previousDay,
+  getTimezone,
+  formatHour,
+  getHourInTimezone,
+  getDateInTimezone
+}
+
 const DAYS = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ')
 
-module.exports.extract = function extract (date, local) {
+function extract (date, local) {
   if (!date) return null
 
   try {
@@ -13,7 +26,7 @@ module.exports.extract = function extract (date, local) {
   }
 }
 
-module.exports.today = function today () {
+function today () {
   var now = new Date()
   return new Date(
     now.getFullYear(),
@@ -22,7 +35,7 @@ module.exports.today = function today () {
   )
 }
 
-module.exports.stringify = function stringify (date) {
+function stringify (date) {
   return [
     date.getFullYear(),
     date.getMonth() + 1,
@@ -30,29 +43,29 @@ module.exports.stringify = function stringify (date) {
   ].join('-')
 }
 
-module.exports.niceFormat = function niceFormat (date) {
+function niceFormat (date) {
   return DAYS[date.getDay()] + ' ' + [
     date.getMonth() + 1, date.getDate()
   ].join('/')
 }
 
-module.exports.nextDay = function nextDay (date) {
+function nextDay (date) {
   var next = new Date(date.valueOf())
   next.setDate(date.getDate() + 1)
   return next
 }
 
-module.exports.previousDay = function previousDay (date) {
+function previousDay (date) {
   var prev = new Date(date.valueOf())
   prev.setDate(date.getDate() - 1)
   return prev
 }
 
-module.exports.getTimezone = function getTimezone () {
+function getTimezone () {
   return Intl.DateTimeFormat().resolvedOptions().timeZone
 }
 
-module.exports.formatHour = function formatHour (intHour) {
+function formatHour (intHour) {
   if (intHour === 0) {
     return '12 AM'
   } else if (intHour > 12) {
@@ -62,7 +75,7 @@ module.exports.formatHour = function formatHour (intHour) {
   }
 }
 
-module.exports.getHourInTimezone = function getHourInTimezone (date, timezone) {
+function getHourInTimezone (date, timezone) {
   return applyDateFormat(date, {
     timeZone: timezone,
     hour: 'numeric',
@@ -70,7 +83,7 @@ module.exports.getHourInTimezone = function getHourInTimezone (date, timezone) {
   })
 }
 
-module.exports.getDateInTimezone = function getDateInTimezone (date, timezone) {
+function getDateInTimezone (date, timezone) {
   var localDate = applyDateFormat(date, {
     timeZone: timezone,
     year: 'numeric',
@@ -80,6 +93,8 @@ module.exports.getDateInTimezone = function getDateInTimezone (date, timezone) {
   let [ month, day, year ] = localDate.split('/')
   return new Date(Date.UTC(year, month - 1, day))
 }
+
+//  private helpers
 
 function applyDateFormat (date, options) {
   var formatter = new Intl.DateTimeFormat(['en-us'], options)

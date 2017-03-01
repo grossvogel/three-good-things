@@ -1,22 +1,43 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
-const config = require('../config')
 const Identity = appRequire('model/identity')
 const User = appRequire('model/user')
 const password = appRequire('password')
 
-//  passport config
-passport.use(new LocalStrategy(passwordLogin))
-passport.use(new GoogleStrategy({
-  clientID: config.google.id,
-  clientSecret: config.google.secret,
-  callbackURL: config.base_url + '/auth/google/callback' },
-  googleLogin
-))
+module.exports = {
+  initLocalLogin,
+  initGoogleLogin,
+  loadUserFromSession,
+  getCurrentUser,
+  processSignup,
+  processLogin,
+  googleRedirect,
+  googleCallback,
+  requireUser,
 
-//  exports
-module.exports.loadUserFromSession = function loadUserFromSession (req, _res, next) {
+  //  private... exported for testing
+  _googleLogin: googleLogin,
+  _passwordLogin: passwordLogin,
+  _createUserWithPassword: createUserWithPassword
+}
+
+//  passport setup
+function initLocalLogin (_config) {
+  passport.use(new LocalStrategy(passwordLogin))
+}
+
+function initGoogleLogin (config) {
+  passport.use(new GoogleStrategy({
+    clientID: config.google.id,
+    clientSecret: config.google.secret,
+    callbackURL: config.base_url + '/auth/google/callback' },
+    googleLogin
+  ))
+}
+
+//  middleware
+function loadUserFromSession (req, _res, next) {
   req.user = null
   if (!req.session.userId) return next()
 
@@ -29,23 +50,25 @@ module.exports.loadUserFromSession = function loadUserFromSession (req, _res, ne
     next()
   })
 }
-module.exports.getCurrentUser = function getCurrentUser (req, res, _next) {
+
+//  route handlers
+function getCurrentUser (req, res, _next) {
   var user = req.user || null
   return res.json({ err: null, user: user })
 }
 
-module.exports.processSignup = function processSignup (req, res, _next) {
+function processSignup (req, res, _next) {
   createUserWithPassword(req.body.username, req.body.password).then(function (user) {
     if (user) {
       req.session.userId = user.id
     }
-    res.json({ err: null, user: user })
+    res.status(201).json({ err: null, user: user })
   }).catch(function (err) {
     res.json({ err: err, user: null })
   })
 }
 
-module.exports.processLogin = function processLogin (req, res, next) {
+function processLogin (req, res, next) {
   passport.authenticate('local', function (err, user, _info) {
     if (err) { return next(err) }
     if (!user) {
@@ -57,8 +80,13 @@ module.exports.processLogin = function processLogin (req, res, next) {
   })(req, res, next)
 }
 
-module.exports.googleRedirect = passport.authenticate('google', { scope: 'https://www.googleapis.com/auth/plus.login' })
-module.exports.googleCallback = function googleCallback (req, res, next) {
+function googleRedirect (req, res, next) {
+  passport.authenticate('google', {
+    scope: 'https://www.googleapis.com/auth/plus.login'
+  })(req, res, next)
+}
+
+function googleCallback (req, res, next) {
   passport.authenticate('google', function (err, user, _info) {
     if (err) {
       console.log(err)
@@ -71,11 +99,7 @@ module.exports.googleCallback = function googleCallback (req, res, next) {
   })(req, res, next)
 }
 
-module.exports.googleLogin = googleLogin
-module.exports.passwordLogin = passwordLogin
-module.exports.createUserWithPassword = createUserWithPassword
-
-module.exports.requireUser = function (req, res, next) {
+function requireUser (req, res, next) {
   if (!req.user) {
     res.status(401)
     res.json({ err: 'Authentication Required' })
@@ -84,7 +108,8 @@ module.exports.requireUser = function (req, res, next) {
   }
 }
 
-//  logic
+//  private helpers
+
 function newUser (username) {
   var user = new User({
     username: username

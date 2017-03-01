@@ -1,5 +1,5 @@
 const React = require('react')
-const auth = require('./auth')
+const auth = require('../auth')
 const InputRow = require('./input-row')
 const Loading = require('./loading')
 

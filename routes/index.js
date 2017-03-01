@@ -10,5 +10,8 @@ router.get('/', function (req, res, next) {
     pushServerKey: config.push.publicKey
   })
 })
+router.get('/env', function (_req, res, _next) {
+  res.send(config.env)
+})
 
 module.exports = router

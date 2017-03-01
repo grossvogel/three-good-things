@@ -1,25 +1,8 @@
-module.exports.post = function post (endpoint, data) {
-  return window.fetch(endpoint, getOptions({
-    body: JSON.stringify(data),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }))
+module.exports = {
+  post: post,
+  get: get,
+  request: request
 }
-
-module.exports.get = function get (endpoint) {
-  return window.fetch(endpoint, getOptions({
-    method: 'get'
-  }))
-}
-
-module.exports.request = request
-
-function request (endpoint, method, options) {
-  options = options || {}
-  options.method = method || 'get'
-  return window.fetch(endpoint, getOptions(options))
-};
 
 const defaults = {
   method: 'post',
@@ -29,6 +12,27 @@ const defaults = {
     'X-CSRF-Token': document.getElementById('csrf').value
   }
 }
+
+function post (endpoint, data) {
+  return request(endpoint, 'post', {
+    body: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+function get (endpoint) {
+  return request(endpoint)
+}
+
+function request (endpoint, method, options) {
+  options = options || {}
+  options.method = method || 'get'
+  return window.fetch(endpoint, getOptions(options)).then(function (response) {
+    return response.json()
+  })
+};
 
 function getOptions (overrides) {
   var options = Object.assign({}, defaults, overrides)

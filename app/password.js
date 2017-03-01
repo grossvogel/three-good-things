@@ -1,6 +1,11 @@
 const crypto = require('crypto')
 
-module.exports.hash = function hash (rawPW) {
+module.exports = {
+  hash,
+  check
+}
+
+function hash (rawPW) {
   return newSalt().then(function (salt) {
     return pbkdf2Hash(rawPW, salt)
   }).then(function (hashInfo) {
@@ -10,7 +15,7 @@ module.exports.hash = function hash (rawPW) {
   })
 }
 
-module.exports.check = function check (rawPW, saltAndHashedPW) {
+function check (rawPW, saltAndHashedPW) {
   var hashedPW, salt;
   [salt, hashedPW] = saltAndHashedPW.split('#')
   if (!salt || !hashedPW) {
@@ -23,6 +28,8 @@ module.exports.check = function check (rawPW, saltAndHashedPW) {
     })
   }
 }
+
+//  private helpers
 
 function newSalt () {
   return new Promise(function (resolve, reject) {

@@ -2,12 +2,10 @@
 
 ### TODO
 
-* Use helmet? (require SSL, XSS, etc.)
-* Switch to standardjs style guide? (install vim plugin?)
+* Require SSL http://stackoverflow.com/a/31144924/14957
+* Add helmet for security headers
 * Try rewriting anonymous functions with =>
-* Refactor & rearrange as necessary
 * Add a logging library (winston?)
-* Testing! (Supertest for endpoints?)
 * Client-side form validation
 * Server-side validation... in the model & elsewhere?
 * Image upload w/ device camera support
