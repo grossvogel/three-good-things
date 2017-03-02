@@ -27553,6 +27553,7 @@ function getSubscriptionState() {
 }
 
 function fetchSubscriptionInfoFromServer(subscription) {
+  if (!subscription) return { subscription: null, enabled: true };
   var subscriptionInfo = parseEndpointAndId(subscription);
   return api.get('/subscriptions/' + subscriptionInfo.subscriptionId).then(function (result) {
     if (result.subscription) {

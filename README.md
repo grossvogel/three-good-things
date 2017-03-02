@@ -2,6 +2,7 @@
 
 ### TODO
 
+* Notifications in Firefox?
 * Add helmet for security headers?
 * Client-side form validation
 * Image upload w/ device camera support
