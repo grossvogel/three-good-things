@@ -27,7 +27,6 @@ module.exports = function (app, config) {
   app.use(bodyParser.json())
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(cookieParser())
-  app.use(express.static(path.join(__dirname, '../public')))
 
   if (config.env !== 'test') app.use(logger('dev'))
   app.use(sass({
@@ -38,6 +37,7 @@ module.exports = function (app, config) {
     sourceMap: true,
     prefix: '/stylesheets'
   }))
+  app.use(express.static(path.join(__dirname, '../public')))
 
   app.use(passport.initialize())
 }

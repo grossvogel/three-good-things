@@ -153,6 +153,7 @@ button, .button{
   }
 }
 .error{
+  margin-top: $padding;
   background:lighten($color_accent_3, 3%);
   border:2px solid $color_accent_1;
   padding: $padding;

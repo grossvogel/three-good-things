@@ -104,6 +104,7 @@ button, .button {
     padding: 0.2rem 0.5rem; }
 
 .error {
+  margin-top: 1rem;
   background: #fefefe;
   border: 2px solid #38B4DB;
   padding: 1rem;

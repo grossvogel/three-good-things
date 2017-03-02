@@ -11,6 +11,17 @@ module.exports = {
   remindAll
 }
 
+const PushService = {
+  Chrome: 'Chrome',
+  Firefox: 'Firefox',
+  Unknown: 'Unknown'
+}
+const PushEndpoint = {
+  GCM: 'https://android.googleapis.com/gcm/send/',
+  FCM: 'https://fcm.googleapis.com/fcm/send',
+  Firefox: 'https://updates.push.services.mozilla.com/wpush/v1'
+}
+
 function save (req, res, _next) {
   const subscription = extractSubscription(req)
   saveSubscription(req.user, subscription).then(function (subInfo) {
@@ -130,10 +141,32 @@ function remindIfNecessary (subscription) {
 }
 
 function remind (subscription) {
-  var endpoint = 'https://fcm.googleapis.com/fcm/send'
+  switch (getPushService(subscription)) {
+    case PushService.Chrome:
+      return remindChrome(subscription)
+    case PushService.Firefox:
+      return remindFirefox(subscription)
+    default:
+      return Promise.reject('Unknown Push Service')
+  }
+}
+
+function getPushService (subscription) {
+  if (subscription.endpoint.indexOf(PushEndpoint.GCM) !== -1 ||
+      subscription.endpoint.indexOf(PushEndpoint.FCM) !== -1) {
+    return PushService.Chrome
+  } else if (subscription.endpoint.indexOf(PushEndpoint.Firefox) !== -1) {
+    return PushService.Firefox
+  } else {
+    return PushService.Unknown
+  }
+}
+
+function remindChrome (subscription) {
+  let fcmEndpoint = 'https://fcm.googleapis.com/fcm/send'
   return new Promise(function (resolve, reject) {
     request({
-      url: endpoint,
+      url: fcmEndpoint,
       method: 'POST',
       json: true,
       body: {
@@ -150,7 +183,11 @@ function remind (subscription) {
       }
     })
   })
-};
+}
+
+function remindFirefox (subscription) {
+  return Promise.reject('Firefox notifications not implemented yet')
+}
 
 function timeMatches (now, subscription) {
   return dateUtil.getHourInTimezone(now, subscription.timezone) === subscription.hour

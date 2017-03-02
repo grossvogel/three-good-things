@@ -1,3 +1,5 @@
+const moment = require('moment-timezone')
+
 module.exports = {
   extract,
   today,
@@ -62,7 +64,7 @@ function previousDay (date) {
 }
 
 function getTimezone () {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || moment.tz.guess()
 }
 
 function formatHour (intHour) {
