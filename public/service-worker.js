@@ -21,14 +21,14 @@ self.addEventListener('notificationclick', function (event) {
   // See: http://crbug.com/463146
   event.notification.close()
 
-  // This looks to see if the current is already open and focus instead of opening
+  // focus on existing tab (if the app is open) or open a new one
   /* global clients */
   event.waitUntil(clients.matchAll({
     type: 'window'
   }).then(function (clientList) {
     for (var i = 0; i < clientList.length; i++) {
       var client = clientList[i]
-      if ((client.url === '/' || client.url === '/#/') && 'focus' in client) {
+      if ((client.url.indexOf(self.location.host) !== -1) && 'focus' in client) {
         return client.focus()
       }
     }
