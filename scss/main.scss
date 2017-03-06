@@ -210,9 +210,11 @@ header{
     padding:$padding $padding $padding (4 * $padding);
     border-bottom:1px solid #ddd;
     box-shadow: 0 2px 2px rgba(0,0,0,0.2);
+    cursor:pointer;
     &.editing{
       background:transparent;
       box-shadow:none;
+      cursor:auto;
     }
     &:last-child.editing{
       border-bottom:none;

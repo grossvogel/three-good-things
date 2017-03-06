@@ -57,7 +57,7 @@ function GoodThingComponent (props) {
       <li className={'editing number' + props.number}>
         <div className='number'>{props.number}</div>
         <form onSubmit={props.onSubmit}>
-          <InputRow placeholder='what good thing happened today?'
+          <InputRow placeholder='A good thing from today'
             value={props.title} onChange={props.onUpdateTitle} />
           <div className='input-row'>
             <textarea placeholder='More details...' value={props.details}
