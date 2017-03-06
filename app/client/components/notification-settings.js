@@ -31,14 +31,13 @@ module.exports = React.createClass({
   },
   handleSubscribe: function (e) {
     e.preventDefault()
-    var component = this
     subscriptions.subscribe(this.state.hour, dateUtil.getTimezone())
     .then(function (subscription) {
-      component.updateSubscriptionStatus({
+      this.updateSubscriptionStatus({
         subscription: subscription,
         enabled: true
       })
-    }).catch(function (err) {
+    }.bind(this)).catch(function (err) {
       console.log(err)
     })
   },
@@ -53,10 +52,9 @@ module.exports = React.createClass({
   },
   handleDeleteSubscription: function (e) {
     e.preventDefault()
-    var component = this
     subscriptions.remove(this.state.subscription.subscriptionId).then(function () {
-      component.setState({ subscription: null })
-    }).catch(function (err) {
+      this.setState({ subscription: null })
+    }.bind(this)).catch(function (err) {
       console.log(err)
     })
   },

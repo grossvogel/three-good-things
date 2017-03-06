@@ -7,6 +7,9 @@ Google Chrome, you can also receive a daily push notification
 to remind you if you haven't yet entered your three things.
 
 
+Demo: https://three-goodthings.herokuapp.com/
+
+
 ### TODO
 
 * Get notifications working in Firefox

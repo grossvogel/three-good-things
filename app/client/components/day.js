@@ -8,56 +8,47 @@ const Link = Router.Link
 
 module.exports = React.createClass({
   getInitialState: function () {
-    let [ date, today ] = extractDate(this.props.params.date)
     return {
       loading: true,
-      date: date,
-      goodThings: [],
-      today: today,
-      editIndex: extractEditIndex(this.props.params.editIndex)
+      goodThings: []
     }
   },
   componentWillMount: function () {
-    this.loadData()
+    this.loadData(this.props.params.date)
   },
   handleUpdateGoodThing: function () {
-    this.state.editIndex = null
-    this.loadData()
+    this.loadData(this.props.params.date)
   },
   handleEditGoodThing: function (index) {
-    this.setState({
-      editIndex: index
-    })
+    let [ date ] = extractDate(this.props.params.date)
+    let dest = '/day/' + dateUtil.stringify(date) + '/' + index
+    this.props.router.replace(dest)
   },
   componentWillReceiveProps: function (nextProps) {
-    let [ date, today ] = extractDate(nextProps.params.date)
     this.setState({
-      date: date,
-      today: today,
-      loading: true,
-      editIndex: extractEditIndex(nextProps.params.editIndex)
+      loading: true
     }, function () {
-      this.loadData()
+      this.loadData(nextProps.params.date)
     })
   },
-  loadData: function () {
-    var component = this
-    loadGoodThings(this.state.date, this.state.today, this.state.editIndex).then(function ({goodThings, editIndex}) {
-      component.setState({
+  loadData: function (date) {
+    loadGoodThings(date).then(function (goodThings) {
+      this.setState({
         loading: false,
-        goodThings: goodThings,
-        editIndex: editIndex
+        goodThings: goodThings
       })
-    })
+    }.bind(this))
   },
   render: function () {
+    let [ date, today ] = extractDate(this.props.params.date)
+    let editIndex = extractEditIndex(this.props.params.editIndex, this.state.goodThings)
     if (this.state.loading) {
       return <Loading />
     }
     return <DayComponent
-      today={this.state.today}
-      date={this.state.date}
-      editIndex={this.state.editIndex}
+      today={today}
+      date={date}
+      editIndex={editIndex}
       onUpdateGoodThing={this.handleUpdateGoodThing}
       onEditGoodThing={this.handleEditGoodThing}
       goodThings={this.state.goodThings} />
@@ -97,7 +88,8 @@ function extractDate (initial) {
   return [ date, (date.valueOf() === today.valueOf()) ]
 }
 
-function loadGoodThings (date, today, editIndex) {
+function loadGoodThings (dateParam) {
+  let [ date, today ] = extractDate(dateParam)
   var call = api.get('/good-things/' + dateUtil.stringify(date))
   return call.then(function (result) {
     return result.goodThings
@@ -105,11 +97,11 @@ function loadGoodThings (date, today, editIndex) {
     console.log(err)
     return []
   }).then(function (goodThings) {
-    return finalizeThings(goodThings, today, editIndex)
+    return finalizeThings(goodThings, today)
   })
 }
 
-function finalizeThings (goodThings, today, editIndex) {
+function finalizeThings (goodThings, today) {
   goodThings.map(function (goodThing, index) {
     goodThing.id = goodThing._id
   })
@@ -120,14 +112,14 @@ function finalizeThings (goodThings, today, editIndex) {
       details: '',
       key: goodThings.length + 1
     }
-    editIndex = editIndex || goodThings.length
     goodThings.push(newThing)
   }
-  return { goodThings: goodThings, editIndex: editIndex }
+  return goodThings
 }
 
-function extractEditIndex (initial) {
-  var editIndex = parseInt(initial)
+function extractEditIndex (initial, goodThings) {
+  let editIndex = parseInt(initial)
+  let goodThingCount = goodThings.length
   switch (editIndex) {
     case 0:
     case 1:
@@ -135,7 +127,9 @@ function extractEditIndex (initial) {
         //  already set
       break
     default:
-      editIndex = null
+      editIndex = (goodThingCount < 3 || !goodThings[2].id)
+        ? goodThingCount - 1
+        : null
       break
   }
   return editIndex

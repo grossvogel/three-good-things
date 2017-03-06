@@ -26946,56 +26946,47 @@ module.exports = React.createClass({
   displayName: 'exports',
 
   getInitialState: function () {
-    let [date, today] = extractDate(this.props.params.date);
     return {
       loading: true,
-      date: date,
-      goodThings: [],
-      today: today,
-      editIndex: extractEditIndex(this.props.params.editIndex)
+      goodThings: []
     };
   },
   componentWillMount: function () {
-    this.loadData();
+    this.loadData(this.props.params.date);
   },
   handleUpdateGoodThing: function () {
-    this.state.editIndex = null;
-    this.loadData();
+    this.loadData(this.props.params.date);
   },
   handleEditGoodThing: function (index) {
-    this.setState({
-      editIndex: index
-    });
+    let [date] = extractDate(this.props.params.date);
+    let dest = '/day/' + dateUtil.stringify(date) + '/' + index;
+    this.props.router.replace(dest);
   },
   componentWillReceiveProps: function (nextProps) {
-    let [date, today] = extractDate(nextProps.params.date);
     this.setState({
-      date: date,
-      today: today,
-      loading: true,
-      editIndex: extractEditIndex(nextProps.params.editIndex)
+      loading: true
     }, function () {
-      this.loadData();
+      this.loadData(nextProps.params.date);
     });
   },
-  loadData: function () {
-    var component = this;
-    loadGoodThings(this.state.date, this.state.today, this.state.editIndex).then(function ({ goodThings, editIndex }) {
-      component.setState({
+  loadData: function (date) {
+    loadGoodThings(date).then(function (goodThings) {
+      this.setState({
         loading: false,
-        goodThings: goodThings,
-        editIndex: editIndex
+        goodThings: goodThings
       });
-    });
+    }.bind(this));
   },
   render: function () {
+    let [date, today] = extractDate(this.props.params.date);
+    let editIndex = extractEditIndex(this.props.params.editIndex, this.state.goodThings);
     if (this.state.loading) {
       return React.createElement(Loading, null);
     }
     return React.createElement(DayComponent, {
-      today: this.state.today,
-      date: this.state.date,
-      editIndex: this.state.editIndex,
+      today: today,
+      date: date,
+      editIndex: editIndex,
       onUpdateGoodThing: this.handleUpdateGoodThing,
       onEditGoodThing: this.handleEditGoodThing,
       goodThings: this.state.goodThings });
@@ -27055,7 +27046,8 @@ function extractDate(initial) {
   return [date, date.valueOf() === today.valueOf()];
 }
 
-function loadGoodThings(date, today, editIndex) {
+function loadGoodThings(dateParam) {
+  let [date, today] = extractDate(dateParam);
   var call = api.get('/good-things/' + dateUtil.stringify(date));
   return call.then(function (result) {
     return result.goodThings;
@@ -27063,11 +27055,11 @@ function loadGoodThings(date, today, editIndex) {
     console.log(err);
     return [];
   }).then(function (goodThings) {
-    return finalizeThings(goodThings, today, editIndex);
+    return finalizeThings(goodThings, today);
   });
 }
 
-function finalizeThings(goodThings, today, editIndex) {
+function finalizeThings(goodThings, today) {
   goodThings.map(function (goodThing, index) {
     goodThing.id = goodThing._id;
   });
@@ -27078,14 +27070,14 @@ function finalizeThings(goodThings, today, editIndex) {
       details: '',
       key: goodThings.length + 1
     };
-    editIndex = editIndex || goodThings.length;
     goodThings.push(newThing);
   }
-  return { goodThings: goodThings, editIndex: editIndex };
+  return goodThings;
 }
 
-function extractEditIndex(initial) {
-  var editIndex = parseInt(initial);
+function extractEditIndex(initial, goodThings) {
+  let editIndex = parseInt(initial);
+  let goodThingCount = goodThings.length;
   switch (editIndex) {
     case 0:
     case 1:
@@ -27093,7 +27085,7 @@ function extractEditIndex(initial) {
       //  already set
       break;
     default:
-      editIndex = null;
+      editIndex = goodThingCount < 3 || !goodThings[2].id ? goodThingCount - 1 : null;
       break;
   }
   return editIndex;
@@ -27122,20 +27114,19 @@ module.exports = React.createClass({
     };
   },
   componentWillMount: function () {
-    var component = this;
     if (auth.loggedIn()) {
-      component.completeLogin();
+      this.completeLogin();
     } else {
       auth.checkSession().then(function (user) {
         if (user) {
           auth.updateUser(user);
-          component.completeLogin();
+          this.completeLogin();
         } else {
-          component.setState({
+          this.setState({
             loading: false
           });
         }
-      }).catch(function (err) {
+      }.bind(this)).catch(function (err) {
         console.log(err);
       });
     }
@@ -27165,25 +27156,24 @@ module.exports = React.createClass({
     this.setState({
       loginInProgress: true
     });
-    var component = this;
     var submit = auth.signupOrLogin(this.state.username, this.state.password, this.state.newAccount);
     submit.then(function (user) {
       if (user) {
         auth.updateUser(user);
-        component.completeLogin();
+        this.completeLogin();
       } else {
-        component.setState({
+        this.setState({
           error: true,
           loginInProgress: false
         });
       }
-    }).catch(function (err) {
+    }.bind(this)).catch(function (err) {
       console.log(err);
-      component.setState({
+      this.setState({
         error: true,
         loginInProgress: false
       });
-    });
+    }.bind(this));
   },
   render: function () {
     if (this.state.loading) {
@@ -27389,7 +27379,7 @@ function GoodThingComponent(props) {
       React.createElement(
         'form',
         { onSubmit: props.onSubmit },
-        React.createElement(InputRow, { placeholder: 'what good thing happened today?',
+        React.createElement(InputRow, { placeholder: 'A good thing from today',
           value: props.title, onChange: props.onUpdateTitle }),
         React.createElement(
           'div',
@@ -27496,13 +27486,12 @@ module.exports = React.createClass({
   },
   handleSubscribe: function (e) {
     e.preventDefault();
-    var component = this;
     subscriptions.subscribe(this.state.hour, dateUtil.getTimezone()).then(function (subscription) {
-      component.updateSubscriptionStatus({
+      this.updateSubscriptionStatus({
         subscription: subscription,
         enabled: true
       });
-    }).catch(function (err) {
+    }.bind(this)).catch(function (err) {
       console.log(err);
     });
   },
@@ -27517,10 +27506,9 @@ module.exports = React.createClass({
   },
   handleDeleteSubscription: function (e) {
     e.preventDefault();
-    var component = this;
     subscriptions.remove(this.state.subscription.subscriptionId).then(function () {
-      component.setState({ subscription: null });
-    }).catch(function (err) {
+      this.setState({ subscription: null });
+    }.bind(this)).catch(function (err) {
       console.log(err);
     });
   },

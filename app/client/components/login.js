@@ -15,20 +15,19 @@ module.exports = React.createClass({
     }
   },
   componentWillMount: function () {
-    var component = this
     if (auth.loggedIn()) {
-      component.completeLogin()
+      this.completeLogin()
     } else {
       auth.checkSession().then(function (user) {
         if (user) {
           auth.updateUser(user)
-          component.completeLogin()
+          this.completeLogin()
         } else {
-          component.setState({
+          this.setState({
             loading: false
           })
         }
-      }).catch(function (err) {
+      }.bind(this)).catch(function (err) {
         console.log(err)
       })
     }
@@ -58,25 +57,24 @@ module.exports = React.createClass({
     this.setState({
       loginInProgress: true
     })
-    var component = this
     var submit = auth.signupOrLogin(this.state.username, this.state.password, this.state.newAccount)
     submit.then(function (user) {
       if (user) {
         auth.updateUser(user)
-        component.completeLogin()
+        this.completeLogin()
       } else {
-        component.setState({
+        this.setState({
           error: true,
           loginInProgress: false
         })
       }
-    }).catch(function (err) {
+    }.bind(this)).catch(function (err) {
       console.log(err)
-      component.setState({
+      this.setState({
         error: true,
         loginInProgress: false
       })
-    })
+    }.bind(this))
   },
   render: function () {
     if (this.state.loading) {
