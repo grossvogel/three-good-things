@@ -78,11 +78,11 @@ function formatHour (intHour) {
 }
 
 function getHourInTimezone (date, timezone) {
-  return applyDateFormat(date, {
+  return parseInt(applyDateFormat(date, {
     timeZone: timezone,
     hour: 'numeric',
     hour12: false
-  })
+  }))
 }
 
 function getDateInTimezone (date, timezone) {

@@ -8,7 +8,10 @@ module.exports = {
   save,
   get,
   remove,
-  remindAll
+  remindAll,
+
+  //  private... exported for testing
+  _timeMatches: timeMatches
 }
 
 const PushService = {
@@ -190,5 +193,6 @@ function remindFirefox (subscription) {
 }
 
 function timeMatches (now, subscription) {
-  return dateUtil.getHourInTimezone(now, subscription.timezone) === subscription.hour
+  let match = dateUtil.getHourInTimezone(now, subscription.timezone) === subscription.hour
+  return match
 }
