@@ -13,7 +13,6 @@ Demo: https://three-goodthings.herokuapp.com/
 ### TODO
 
 * Get notifications working in Firefox
-* Add helmet for security headers?
 * Client-side error message for empty Good Thing title
 * Image upload w/ device camera support
 * Load additional good things on history view

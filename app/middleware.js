@@ -8,10 +8,12 @@ const passport = require('passport')
 const sessions = require('client-sessions')
 const csurf = require('csurf')
 const sass = require('node-sass-middleware')
+const helmet = require('helmet')
 const auth = appRequire('auth')
 
 module.exports = function (app, config) {
   app.use(httpsRedirect(config))
+  app.use(helmet(helmetOptions()))
 
   // sessions & csrf
   app.use(sessions({
@@ -52,5 +54,18 @@ function httpsRedirect (config) {
       return res.redirect('https://' + req.get('host') + req.url)
     }
     next()
+  }
+}
+
+function helmetOptions () {
+  return {
+    noCache: true,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ['fonts.googleapis.com', "'self'"],
+        fontSrc: ['fonts.gstatic.com', 'data:']
+      }
+    }
   }
 }
