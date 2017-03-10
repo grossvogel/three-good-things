@@ -35,8 +35,8 @@ module.exports = React.createClass({
       updateHandler()
     })
   },
-  handleEdit: function () {
-    this.props.onEditGoodThing(this.props.date, this.props.number - 1)
+  handleClick: function () {
+    this.props.onClickGoodThing(this.props.date, this.props.number - 1)
   },
   render: function () {
     return <GoodThingComponent
@@ -46,7 +46,7 @@ module.exports = React.createClass({
       editing={this.props.editing}
       onUpdateTitle={this.handleUpdateTitle}
       onUpdateDetails={this.handleUpdateDetails}
-      onEdit={this.handleEdit}
+      onClick={this.handleClick}
       onSubmit={this.handleSubmit} />
   }
 })
@@ -69,7 +69,7 @@ function GoodThingComponent (props) {
     )
   } else {
     return (
-      <li className={'goodThing number' + props.number} onClick={props.onEdit}>
+      <li className={'goodThing number' + props.number} onClick={props.onClick}>
         <div className='number'>{props.number}</div>
         <div className='title'>{props.title || '-- tbd --'}</div>
         <p className='details'>{props.details}</p>

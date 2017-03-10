@@ -12925,8 +12925,8 @@ module.exports = React.createClass({
       updateHandler();
     });
   },
-  handleEdit: function () {
-    this.props.onEditGoodThing(this.props.date, this.props.number - 1);
+  handleClick: function () {
+    this.props.onClickGoodThing(this.props.date, this.props.number - 1);
   },
   render: function () {
     return React.createElement(GoodThingComponent, {
@@ -12936,7 +12936,7 @@ module.exports = React.createClass({
       editing: this.props.editing,
       onUpdateTitle: this.handleUpdateTitle,
       onUpdateDetails: this.handleUpdateDetails,
-      onEdit: this.handleEdit,
+      onClick: this.handleClick,
       onSubmit: this.handleSubmit });
   }
 });
@@ -12968,7 +12968,7 @@ function GoodThingComponent(props) {
   } else {
     return React.createElement(
       'li',
-      { className: 'goodThing number' + props.number, onClick: props.onEdit },
+      { className: 'goodThing number' + props.number, onClick: props.onClick },
       React.createElement(
         'div',
         { className: 'number' },
@@ -27076,7 +27076,7 @@ module.exports = React.createClass({
   handleUpdateGoodThing: function () {
     this.loadData(this.props.params.date);
   },
-  handleEditGoodThing: function (date, index) {
+  handleClickGoodThing: function (date, index) {
     let dest = '/day/' + dateUtil.stringify(date) + '/' + index;
     this.props.router.replace(dest);
   },
@@ -27106,7 +27106,7 @@ module.exports = React.createClass({
       date: date,
       editIndex: editIndex,
       onUpdateGoodThing: this.handleUpdateGoodThing,
-      onEditGoodThing: this.handleEditGoodThing,
+      onClickGoodThing: this.handleClickGoodThing,
       goodThings: this.state.goodThings });
   }
 });
@@ -27151,7 +27151,7 @@ function DayComponent(props) {
         date: props.date,
         editing: index === props.editIndex,
         onUpdateGoodThing: props.onUpdateGoodThing,
-        onEditGoodThing: props.onEditGoodThing,
+        onClickGoodThing: props.onClickGoodThing,
         goodThing: goodThing,
         key: goodThing.id || goodThing.key }))
     ),
@@ -27247,7 +27247,7 @@ module.exports = React.createClass({
       });
     }.bind(this));
   },
-  handleEditGoodThing: function (date, index) {
+  handleClickGoodThing: function (date, index) {
     let dest = '/day/' + dateUtil.stringify(date) + '/' + index;
     this.props.router.push(dest);
   },
@@ -27256,7 +27256,7 @@ module.exports = React.createClass({
       return React.createElement(Loading, null);
     }
     return React.createElement(HistoryComponent, {
-      onEditGoodThing: this.handleEditGoodThing,
+      onClickGoodThing: this.handleClickGoodThing,
       goodThings: this.state.goodThings });
   }
 });
@@ -27265,15 +27265,19 @@ function HistoryComponent(props) {
   let lastDay = dateUtil.stringify(dateUtil.today());
   let goodThingsThisDay = 1;
   let items = [];
-  appendTodayHeader(items, props.goodThings, lastDay);
-  if (items.length == 0) {
-    items.push(React.createElement(DateHeader, { date: dateUtil.today(), key: lastDay }));
+  if (hasGoodThingsToday(props.goodThings, lastDay)) {
+    items.push(React.createElement(DateHeader, { prefix: 'Today - ', date: dateUtil.today(), key: lastDay }));
+  } else {
+    items.push(React.createElement(EmptyTodayHeader, { key: 'today' }));
   }
   props.goodThings.forEach(function (goodThing) {
     let oDay = dateUtil.fromDb(goodThing.day, true);
     let sDay = dateUtil.stringify(oDay);
     if (sDay !== lastDay) {
-      appendMissedDaysHeader(items, sDay, lastDay);
+      let missedDays = getMissedDays(sDay, lastDay);
+      if (missedDays > 0) {
+        items.push(React.createElement(MissingDaysNote, { key: 'missed-' + sDay, days: missedDays }));
+      }
       lastDay = sDay;
       goodThingsThisDay = 1;
       items.push(React.createElement(DateHeader, { date: oDay, key: sDay }));
@@ -27281,7 +27285,7 @@ function HistoryComponent(props) {
     items.push(React.createElement(GoodThing, { number: goodThingsThisDay,
       date: oDay,
       editing: false,
-      onEditGoodThing: props.onEditGoodThing,
+      onClickGoodThing: props.onClickGoodThing,
       goodThing: goodThing,
       key: goodThing._id }));
     goodThingsThisDay++;
@@ -27299,16 +27303,17 @@ function DateHeader(props) {
   let linkText = dateUtil.niceFormat(props.date);
   return React.createElement(
     'li',
-    { className: 'dateLink' },
+    { className: 'dateHeader' },
     React.createElement(
       Link,
       { to: linkDest },
+      props.prefix,
       linkText
     )
   );
 }
 
-function Today() {
+function EmptyTodayHeader() {
   return React.createElement(
     'li',
     { className: 'today' },
@@ -27321,7 +27326,7 @@ function Today() {
   );
 }
 
-function MissingDays(props) {
+function MissingDaysNote(props) {
   let label = props.days > 1 ? 'days' : 'day';
   return React.createElement(
     'li',
@@ -27333,18 +27338,18 @@ function MissingDays(props) {
   );
 }
 
-function appendTodayHeader(items, goodThings, lastDay) {
-  if (goodThings.length === 0 || dateUtil.stringify(dateUtil.fromDb(goodThings[0].day, true)) !== lastDay) {
-    items.push(React.createElement(Today, { key: 'today' }));
+function hasGoodThingsToday(goodThings, today) {
+  if (goodThings.length > 0) {
+    let firstDate = dateUtil.stringify(dateUtil.fromDb(goodThings[0].day, true));
+    return firstDate === today;
   }
+  return false;
 }
 
-function appendMissedDaysHeader(items, currentDay, lastDay) {
+function getMissedDays(currentDay, lastDay) {
   let missedMS = dateUtil.extract(lastDay).getTime() - dateUtil.extract(currentDay).getTime();
   let dayDiff = Math.round(missedMS / (1000 * 60 * 60 * 24));
-  if (dayDiff > 1) {
-    items.push(React.createElement(MissingDays, { key: 'missed-' + currentDay, days: dayDiff - 1 }));
-  }
+  return dayDiff - 1;
 }
 
 function loadHistory() {

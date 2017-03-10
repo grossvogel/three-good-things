@@ -205,15 +205,15 @@ header{
   z-index:1;
   li{
     list-style:none;
-    margin-top: $padding;
+    margin-top: $padding * 1.5;
   }
   li.goodThing{
+  	@include shadow;
     position:relative;
     background:#fff;
     padding:$padding $padding $padding (4 * $padding);
     margin-top:0;
     border-bottom:1px solid #ddd;
-    box-shadow: 0 2px 2px rgba(0,0,0,0.2);
     cursor:pointer;
     &.editing{
       background:transparent;
@@ -230,9 +230,10 @@ header{
       font-size:0.9rem;
     }
   }
-  li.dateLink{
+  li.dateHeader{
     display:block;
     font-size: 1.4rem;
+	padding-bottom:0.3 * $padding;
     a {
       color:$color_text;
       text-decoration:none;

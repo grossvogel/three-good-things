@@ -19,7 +19,7 @@ module.exports = React.createClass({
   handleUpdateGoodThing: function () {
     this.loadData(this.props.params.date)
   },
-  handleEditGoodThing: function (date, index) {
+  handleClickGoodThing: function (date, index) {
     let dest = '/day/' + dateUtil.stringify(date) + '/' + index
     this.props.router.replace(dest)
   },
@@ -49,7 +49,7 @@ module.exports = React.createClass({
       date={date}
       editIndex={editIndex}
       onUpdateGoodThing={this.handleUpdateGoodThing}
-      onEditGoodThing={this.handleEditGoodThing}
+      onClickGoodThing={this.handleClickGoodThing}
       goodThings={this.state.goodThings} />
   }
 })
@@ -72,7 +72,7 @@ function DayComponent (props) {
             date={props.date}
             editing={index === props.editIndex}
             onUpdateGoodThing={props.onUpdateGoodThing}
-            onEditGoodThing={props.onEditGoodThing}
+            onClickGoodThing={props.onClickGoodThing}
             goodThing={goodThing}
             key={goodThing.id || goodThing.key} />
         ))}
