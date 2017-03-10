@@ -8599,6 +8599,7 @@ const moment = __webpack_require__(255)
 
 module.exports = {
   extract,
+  fromDb,
   today,
   stringify,
   niceFormat,
@@ -8623,6 +8624,11 @@ function extract (date, local) {
   } catch (err) {
     return null
   }
+}
+
+function fromDb (date, local) {
+  let [s] = date.split('T')
+  return extract(s, local)
 }
 
 function today () {
@@ -8675,11 +8681,11 @@ function formatHour (intHour) {
 }
 
 function getHourInTimezone (date, timezone) {
-  return applyDateFormat(date, {
+  return parseInt(applyDateFormat(date, {
     timeZone: timezone,
     hour: 'numeric',
     hour12: false
-  })
+  }))
 }
 
 function getDateInTimezone (date, timezone) {
@@ -26957,8 +26963,7 @@ module.exports = React.createClass({
   handleUpdateGoodThing: function () {
     this.loadData(this.props.params.date);
   },
-  handleEditGoodThing: function (index) {
-    let [date] = extractDate(this.props.params.date);
+  handleEditGoodThing: function (date, index) {
     let dest = '/day/' + dateUtil.stringify(date) + '/' + index;
     this.props.router.replace(dest);
   },
@@ -27028,7 +27033,7 @@ function DayComponent(props) {
     ),
     React.createElement(
       'ul',
-      { className: 'inner' },
+      { className: 'inner goodThingList' },
       props.goodThings.map((goodThing, index) => React.createElement(GoodThing, { number: index + 1,
         date: props.date,
         editing: index === props.editIndex,
@@ -27036,6 +27041,15 @@ function DayComponent(props) {
         onEditGoodThing: props.onEditGoodThing,
         goodThing: goodThing,
         key: goodThing.id || goodThing.key }))
+    ),
+    React.createElement(
+      'div',
+      { className: 'historyLink inner' },
+      React.createElement(
+        Link,
+        { to: '/history' },
+        'View History'
+      )
     )
   );
 }
@@ -27351,7 +27365,7 @@ module.exports = React.createClass({
     });
   },
   handleEdit: function () {
-    this.props.onEditGoodThing(this.props.number - 1);
+    this.props.onEditGoodThing(this.props.date, this.props.number - 1);
   },
   render: function () {
     return React.createElement(GoodThingComponent, {
@@ -27370,7 +27384,7 @@ function GoodThingComponent(props) {
   if (props.editing) {
     return React.createElement(
       'li',
-      { className: 'editing number' + props.number },
+      { className: 'goodThing editing number' + props.number },
       React.createElement(
         'div',
         { className: 'number' },
@@ -27393,7 +27407,7 @@ function GoodThingComponent(props) {
   } else {
     return React.createElement(
       'li',
-      { className: 'number' + props.number, onClick: props.onEdit },
+      { className: 'goodThing number' + props.number, onClick: props.onEdit },
       React.createElement(
         'div',
         { className: 'number' },
@@ -27402,7 +27416,7 @@ function GoodThingComponent(props) {
       React.createElement(
         'div',
         { className: 'title' },
-        props.title || 'TBD'
+        props.title || '-- tbd --'
       ),
       React.createElement(
         'p',
@@ -43700,6 +43714,7 @@ const ReactDOM = __webpack_require__(228);
 const Day = __webpack_require__(225);
 const Login = __webpack_require__(226);
 const Settings = __webpack_require__(227);
+const History = __webpack_require__(360);
 const App = __webpack_require__(224);
 const auth = __webpack_require__(75);
 const loginCheck = auth.loginCheck();
@@ -43708,18 +43723,157 @@ const loginCheck = auth.loginCheck();
 var root = document.getElementById('reactRoot');
 var routes = React.createElement(
   __WEBPACK_IMPORTED_MODULE_0_react_router__["Router"],
-  { history: __WEBPACK_IMPORTED_MODULE_0_react_router__["hashHistory"] },
+  { history: __WEBPACK_IMPORTED_MODULE_0_react_router__["browserHistory"] },
   React.createElement(
     __WEBPACK_IMPORTED_MODULE_0_react_router__["Route"],
     { path: '/', component: App },
     React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["IndexRoute"], { component: Day, onEnter: loginCheck }),
     React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["Route"], { path: 'day/:date(/:editIndex)', component: Day, onEnter: loginCheck }),
     React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["Route"], { path: 'settings', component: Settings, onEnter: loginCheck }),
+    React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["Route"], { path: 'history', component: History, onEnter: loginCheck }),
     React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["Route"], { path: 'login', component: Login })
   )
 );
 
 ReactDOM.render(routes, root);
+
+/***/ }),
+/* 360 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const React = __webpack_require__(5);
+const Router = __webpack_require__(35);
+const Link = Router.Link;
+const api = __webpack_require__(37);
+const Loading = __webpack_require__(77);
+const GoodThing = __webpack_require__(229);
+const dateUtil = __webpack_require__(36);
+
+module.exports = React.createClass({
+  displayName: 'exports',
+
+  getInitialState: function () {
+    return {
+      loading: true,
+      goodThings: []
+    };
+  },
+  componentWillMount: function () {
+    loadHistory().then(function (goodThings) {
+      this.setState({
+        loading: false,
+        goodThings: goodThings
+      });
+    }.bind(this));
+  },
+  handleEditGoodThing: function (date, index) {
+    let dest = '/day/' + dateUtil.stringify(date) + '/' + index;
+    this.props.router.push(dest);
+  },
+  render: function () {
+    if (this.state.loading) {
+      return React.createElement(Loading, null);
+    }
+    return React.createElement(HistoryComponent, {
+      onEditGoodThing: this.handleEditGoodThing,
+      goodThings: this.state.goodThings });
+  }
+});
+
+function HistoryComponent(props) {
+  //  @TODO: Always show _something_ for today
+  //  @TODO: Show # of missed days between?
+  let lastDay = dateUtil.stringify(dateUtil.today());
+  let goodThingsThisDay = 0;
+  let items = [];
+  appendTodayHeader(items, props.goodThings, lastDay);
+  props.goodThings.forEach(function (goodThing) {
+    let oDay = dateUtil.fromDb(goodThing.day, true);
+    let sDay = dateUtil.stringify(oDay);
+    if (sDay !== lastDay) {
+      appendMissedDaysHeader(items, sDay, lastDay);
+      lastDay = sDay;
+      goodThingsThisDay = 1;
+      items.push(React.createElement(DateHeader, { date: oDay, key: sDay }));
+    }
+    items.push(React.createElement(GoodThing, { number: goodThingsThisDay,
+      date: oDay,
+      editing: false,
+      onEditGoodThing: props.onEditGoodThing,
+      goodThing: goodThing,
+      key: goodThing._id }));
+    goodThingsThisDay++;
+  });
+
+  return React.createElement(
+    'ul',
+    { className: 'goodThingList history inner' },
+    items
+  );
+}
+
+function DateHeader(props) {
+  let linkDest = '/day/' + dateUtil.stringify(props.date);
+  let linkText = dateUtil.niceFormat(props.date);
+  return React.createElement(
+    'li',
+    { className: 'dateLink' },
+    React.createElement(
+      Link,
+      { to: linkDest },
+      linkText
+    )
+  );
+}
+
+function Today() {
+  return React.createElement(
+    'li',
+    { className: 'today' },
+    'No good things yet today?',
+    React.createElement(
+      Link,
+      { to: '/' },
+      'Record some now!'
+    )
+  );
+}
+
+function MissingDays(props) {
+  let label = props.days > 1 ? 'days' : 'day';
+  return React.createElement(
+    'li',
+    { className: 'missedDays' },
+    'Missed ',
+    props.days,
+    ' ',
+    label
+  );
+}
+
+function appendTodayHeader(items, goodThings, lastDay) {
+  if (goodThings.length === 0 || dateUtil.stringify(dateUtil.fromDb(goodThings[0].day)) !== lastDay) {
+    items.push(React.createElement(Today, { key: 'today' }));
+  }
+}
+
+function appendMissedDaysHeader(items, currentDay, lastDay) {
+  let missedMS = dateUtil.extract(lastDay).getTime() - dateUtil.extract(currentDay).getTime();
+  let dayDiff = Math.round(missedMS / (1000 * 60 * 60 * 24));
+  if (dayDiff > 1) {
+    items.push(React.createElement(MissingDays, { key: 'missed-' + currentDay, days: dayDiff - 1 }));
+  }
+}
+
+function loadHistory() {
+  var call = api.get('/good-things/history');
+  return call.then(function (result) {
+    return result.goodThings;
+  }).catch(function (err) {
+    console.log(err);
+    return [];
+  });
+}
 
 /***/ })
 /******/ ]);

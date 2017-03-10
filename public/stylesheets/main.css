@@ -143,23 +143,41 @@ header .menu {
 .loginContainer .googleButton {
   max-height: 50px; }
 
-.day {
+.goodThingList {
   z-index: 1; }
-  .day li {
+  .goodThingList li {
+    list-style: none;
+    margin-top: 1rem; }
+  .goodThingList li.goodThing {
     position: relative;
     background: #fff;
-    list-style: none;
     padding: 1rem 1rem 1rem 4rem;
+    margin-top: 0;
     border-bottom: 1px solid #ddd;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
     cursor: pointer; }
-    .day li.editing {
+    .goodThingList li.goodThing.editing {
       background: transparent;
       box-shadow: none;
       cursor: auto; }
-    .day li:last-child.editing {
+    .goodThingList li.goodThing:last-child.editing {
       border-bottom: none; }
-  .day .number {
+  .goodThingList li.today a {
+    margin-left: 1rem;
+    font-size: 0.9rem; }
+  .goodThingList li.dateLink {
+    display: block;
+    font-size: 1.4rem; }
+    .goodThingList li.dateLink a {
+      color: #555;
+      text-decoration: none; }
+  .goodThingList li.missedDays {
+    background: #dde9ec;
+    opacity: 0.5;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 0.2rem 0; }
+  .goodThingList .number {
     position: absolute;
     left: 0;
     top: 1rem;
@@ -168,13 +186,17 @@ header .menu {
     line-height: 1;
     width: 4rem;
     text-align: center; }
-  .day .title {
+  .goodThingList .title {
     font-size: 1.2rem;
     padding-top: 0.25rem; }
-  .day .details {
+  .goodThingList .details {
     opacity: 0.8;
     font-size: 0.9rem;
     margin-bottom: 0; }
+
+.day .historyLink {
+  margin-top: 1rem;
+  text-align: right; }
 
 .day .nav {
   background: #7E898C;

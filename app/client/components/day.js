@@ -19,8 +19,7 @@ module.exports = React.createClass({
   handleUpdateGoodThing: function () {
     this.loadData(this.props.params.date)
   },
-  handleEditGoodThing: function (index) {
-    let [ date ] = extractDate(this.props.params.date)
+  handleEditGoodThing: function (date, index) {
     let dest = '/day/' + dateUtil.stringify(date) + '/' + index
     this.props.router.replace(dest)
   },
@@ -67,7 +66,7 @@ function DayComponent (props) {
           { props.today || <Link to={'/day/' + nextDay} className='next'><span>Next Day</span></Link> }
         </div>
       </div>
-      <ul className='inner'>
+      <ul className='inner goodThingList'>
         {props.goodThings.map((goodThing, index) => (
           <GoodThing number={index + 1}
             date={props.date}
@@ -78,6 +77,9 @@ function DayComponent (props) {
             key={goodThing.id || goodThing.key} />
         ))}
       </ul>
+      <div className='historyLink inner'>
+        <Link to='/history'>View History</Link>
+      </div>
     </div>
   )
 }

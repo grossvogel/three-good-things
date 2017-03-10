@@ -36,7 +36,7 @@ module.exports = React.createClass({
     })
   },
   handleEdit: function () {
-    this.props.onEditGoodThing(this.props.number - 1)
+    this.props.onEditGoodThing(this.props.date, this.props.number - 1)
   },
   render: function () {
     return <GoodThingComponent
@@ -54,7 +54,7 @@ module.exports = React.createClass({
 function GoodThingComponent (props) {
   if (props.editing) {
     return (
-      <li className={'editing number' + props.number}>
+      <li className={'goodThing editing number' + props.number}>
         <div className='number'>{props.number}</div>
         <form onSubmit={props.onSubmit}>
           <InputRow placeholder='A good thing from today'
@@ -69,9 +69,9 @@ function GoodThingComponent (props) {
     )
   } else {
     return (
-      <li className={'number' + props.number} onClick={props.onEdit}>
+      <li className={'goodThing number' + props.number} onClick={props.onEdit}>
         <div className='number'>{props.number}</div>
-        <div className='title'>{props.title || 'TBD'}</div>
+        <div className='title'>{props.title || '-- tbd --'}</div>
         <p className='details'>{props.details}</p>
       </li>
     )

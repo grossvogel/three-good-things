@@ -201,13 +201,17 @@ header{
   }
 }
 
-.day{
+.goodThingList{
   z-index:1;
   li{
+    list-style:none;
+    margin-top: $padding;
+  }
+  li.goodThing{
     position:relative;
     background:#fff;
-    list-style:none;
     padding:$padding $padding $padding (4 * $padding);
+    margin-top:0;
     border-bottom:1px solid #ddd;
     box-shadow: 0 2px 2px rgba(0,0,0,0.2);
     cursor:pointer;
@@ -219,6 +223,27 @@ header{
     &:last-child.editing{
       border-bottom:none;
     }
+  }
+  li.today{
+    a{
+      margin-left: 1rem;
+      font-size:0.9rem;
+    }
+  }
+  li.dateLink{
+    display:block;
+    font-size: 1.4rem;
+    a {
+      color:$color_text;
+      text-decoration:none;
+    }
+  }
+  li.missedDays{
+    background:darken($color_accent_3, 7%);
+    opacity:0.5;
+    text-align:center;
+    font-size:0.8rem;
+    padding:0.2rem 0;
   }
   .number{
     position:absolute;
@@ -239,6 +264,10 @@ header{
     font-size:0.9rem;
     margin-bottom:0;
   }
+}
+.day .historyLink{
+  margin-top: $padding;
+  text-align:right;
 }
 .day .nav{
   background:$color_gray_1;

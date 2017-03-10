@@ -4,8 +4,11 @@ const GoodThing = appRequire('model/good-thing.js')
 module.exports = {
   day,
   update,
-  fetchDay
+  fetchDay,
+  history
 }
+
+//  route handlers
 
 function day (req, res, _next) {
   var date = dateUtil.extract(req.params.date)
@@ -15,6 +18,16 @@ function day (req, res, _next) {
 function update (req, res, _next) {
   saveGoodThing(req.user, req, res)
 }
+
+function history (req, res, _next) {
+  fetchHistory(req.user).then(function (goodThings) {
+    res.json({err: null, goodThings: goodThings})
+  }).catch(function (err) {
+    res.json({err: err, goodThings: []})
+  })
+}
+
+//  other exports
 
 function fetchDay (user, date) {
   return GoodThing.find({
@@ -31,6 +44,13 @@ function getGoodThings (user, date, res) {
   }).catch(function (err) {
     res.json({err: err, goodThings: []})
   })
+}
+
+function fetchHistory (user, limit = 100) {
+  return GoodThing.find({user: user})
+    .sort({day: -1, created_at: 1})
+    .limit(limit)
+    .exec()
 }
 
 function saveGoodThing (user, req, res) {

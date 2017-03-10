@@ -4,6 +4,7 @@ var goodThings = appRequire('good-things')
 var auth = appRequire('auth')
 
 router.use(auth.requireUser)
+router.get('/history', goodThings.history)
 router.get('/:date', goodThings.day)
 router.post('/', goodThings.update)
 

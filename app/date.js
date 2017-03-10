@@ -2,6 +2,7 @@ const moment = require('moment-timezone')
 
 module.exports = {
   extract,
+  fromDb,
   today,
   stringify,
   niceFormat,
@@ -26,6 +27,11 @@ function extract (date, local) {
   } catch (err) {
     return null
   }
+}
+
+function fromDb (date, local) {
+  let [s] = date.split('T')
+  return extract(s, local)
 }
 
 function today () {

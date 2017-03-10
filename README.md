@@ -16,7 +16,6 @@ Demo: https://three-goodthings.herokuapp.com/
 * Add helmet for security headers?
 * Client-side error message for empty Good Thing title
 * Image upload w/ device camera support
-* View history of good things in a long summary list
-* Use browserHistory instead of hashHistory for nicer URLs
-* Server-side rendering
+* Load additional good things on history view
+* Server-side rendering?
 

@@ -5,7 +5,7 @@ function route (name) {
 }
 
 module.exports = function (app) {
-  app.use('/', route('index'))
+  app.use('/', route('front-end'))
   app.use('/good-things', route('good-things'))
   app.use('/subscriptions', route('subscriptions'))
   app.use('/auth', route('auth'))
