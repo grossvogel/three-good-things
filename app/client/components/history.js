@@ -36,12 +36,13 @@ module.exports = React.createClass({
 })
 
 function HistoryComponent (props) {
-  //  @TODO: Always show _something_ for today
-  //  @TODO: Show # of missed days between?
   let lastDay = dateUtil.stringify(dateUtil.today())
-  let goodThingsThisDay = 0
+  let goodThingsThisDay = 1
   let items = []
   appendTodayHeader(items, props.goodThings, lastDay)
+  if (items.length == 0) {
+    items.push(<DateHeader date={dateUtil.today()} key={lastDay} />)
+  }
   props.goodThings.forEach(function (goodThing) {
     let oDay = dateUtil.fromDb(goodThing.day, true)
     let sDay = dateUtil.stringify(oDay)
@@ -97,7 +98,7 @@ function MissingDays (props) {
 
 function appendTodayHeader (items, goodThings, lastDay) {
   if (goodThings.length === 0 ||
-    dateUtil.stringify(dateUtil.fromDb(goodThings[0].day)) !== lastDay) {
+    dateUtil.stringify(dateUtil.fromDb(goodThings[0].day, true)) !== lastDay) {
     items.push(<Today key='today' />)
   }
 }
