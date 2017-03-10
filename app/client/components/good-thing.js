@@ -7,12 +7,14 @@ module.exports = React.createClass({
   getInitialState: function () {
     return {
       title: this.props.goodThing.title,
-      details: this.props.goodThing.details
+      details: this.props.goodThing.details,
+      titleError: null
     }
   },
   handleUpdateTitle: function (e) {
     this.setState({
-      title: e.target.value
+      title: e.target.value,
+      titleError: null
     })
   },
   handleUpdateDetails: function (e) {
@@ -22,7 +24,13 @@ module.exports = React.createClass({
   },
   handleSubmit: function (e) {
     e.preventDefault()
-    var updateHandler = this.props.onUpdateGoodThing
+    if (!this.state.title.trim()) {
+      this.setState({
+        titleError: 'Please enter a title for the good thing!'
+      })
+      return
+    }
+    let updateHandler = this.props.onUpdateGoodThing
     saveGoodThing({
       id: this.props.goodThing.id,
       day: this.props.date,
@@ -44,6 +52,7 @@ module.exports = React.createClass({
       title={this.state.title}
       details={this.state.details}
       editing={this.props.editing}
+      titleError={this.state.titleError}
       onUpdateTitle={this.handleUpdateTitle}
       onUpdateDetails={this.handleUpdateDetails}
       onClick={this.handleClick}
@@ -58,7 +67,8 @@ function GoodThingComponent (props) {
         <div className='number'>{props.number}</div>
         <form onSubmit={props.onSubmit}>
           <InputRow placeholder='A good thing from today'
-            value={props.title} onChange={props.onUpdateTitle} />
+            error={props.titleError} value={props.title}
+            onChange={props.onUpdateTitle} />
           <div className='input-row'>
             <textarea placeholder='More details...' value={props.details}
               onChange={props.onUpdateDetails} />

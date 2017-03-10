@@ -12897,12 +12897,14 @@ module.exports = React.createClass({
   getInitialState: function () {
     return {
       title: this.props.goodThing.title,
-      details: this.props.goodThing.details
+      details: this.props.goodThing.details,
+      titleError: null
     };
   },
   handleUpdateTitle: function (e) {
     this.setState({
-      title: e.target.value
+      title: e.target.value,
+      titleError: null
     });
   },
   handleUpdateDetails: function (e) {
@@ -12912,7 +12914,13 @@ module.exports = React.createClass({
   },
   handleSubmit: function (e) {
     e.preventDefault();
-    var updateHandler = this.props.onUpdateGoodThing;
+    if (!this.state.title.trim()) {
+      this.setState({
+        titleError: 'Please enter a title for the good thing!'
+      });
+      return;
+    }
+    let updateHandler = this.props.onUpdateGoodThing;
     saveGoodThing({
       id: this.props.goodThing.id,
       day: this.props.date,
@@ -12934,6 +12942,7 @@ module.exports = React.createClass({
       title: this.state.title,
       details: this.state.details,
       editing: this.props.editing,
+      titleError: this.state.titleError,
       onUpdateTitle: this.handleUpdateTitle,
       onUpdateDetails: this.handleUpdateDetails,
       onClick: this.handleClick,
@@ -12955,7 +12964,8 @@ function GoodThingComponent(props) {
         'form',
         { onSubmit: props.onSubmit },
         React.createElement(InputRow, { placeholder: 'A good thing from today',
-          value: props.title, onChange: props.onUpdateTitle }),
+          error: props.titleError, value: props.title,
+          onChange: props.onUpdateTitle }),
         React.createElement(
           'div',
           { className: 'input-row' },
@@ -13000,6 +13010,7 @@ function saveGoodThing(data) {
 /***/ (function(module, exports, __webpack_require__) {
 
 const React = __webpack_require__(5);
+const Error = __webpack_require__(361);
 
 module.exports = function InputRow(props) {
   return React.createElement(
@@ -13013,7 +13024,8 @@ module.exports = function InputRow(props) {
     React.createElement('input', { type: props.type || 'text', value: props.value,
       placeholder: props.placeholder,
       autoFocus: props.autoFocus,
-      onChange: props.onChange })
+      onChange: props.onChange }),
+    React.createElement(Error, { error: props.error })
   );
 };
 
@@ -27370,6 +27382,7 @@ const React = __webpack_require__(5);
 const auth = __webpack_require__(76);
 const InputRow = __webpack_require__(78);
 const Loading = __webpack_require__(46);
+const Error = __webpack_require__(361);
 
 module.exports = React.createClass({
   displayName: 'exports',
@@ -27403,7 +27416,7 @@ module.exports = React.createClass({
     }
   },
   completeLogin: function () {
-    var dest = auth.nextPathname() || '/';
+    let dest = auth.nextPathname() || '/';
     this.props.router.replace(dest);
   },
   handleUpdateUsername(e) {
@@ -27427,21 +27440,22 @@ module.exports = React.createClass({
     this.setState({
       loginInProgress: true
     });
-    var submit = auth.signupOrLogin(this.state.username, this.state.password, this.state.newAccount);
+    let submit = auth.signupOrLogin(this.state.username, this.state.password, this.state.newAccount);
     submit.then(function (user) {
       if (user) {
         auth.updateUser(user);
         this.completeLogin();
       } else {
+        let msg = this.state.newAccount ? 'Sorry, it looks like the username you chose is already taken.' : 'Sorry, your login credentials could not be verified.';
         this.setState({
-          error: true,
+          error: msg,
           loginInProgress: false
         });
       }
     }.bind(this)).catch(function (err) {
       console.log(err);
       this.setState({
-        error: true,
+        error: 'Sorry, there was a problem validating your info.',
         loginInProgress: false
       });
     }.bind(this));
@@ -27469,22 +27483,16 @@ module.exports = React.createClass({
 });
 
 function LoginComponent(props) {
-  var title = props.newAccount ? 'Create your account to begin' : 'Sign in to your account';
-  var toggle = props.newAccount ? '(sign in)' : '(create an account)';
-  var buttonText = props.newAccount ? 'Create Account' : 'Sign In';
+  let title = props.newAccount ? 'Create your account to begin' : 'Sign in to your account';
+  let toggle = props.newAccount ? '(sign in)' : '(create an account)';
+  let buttonText = props.newAccount ? 'Create Account' : 'Sign In';
   return React.createElement(
     'div',
     { className: 'inner loginContainer' },
     React.createElement(
       'form',
       { onSubmit: props.onSubmit },
-      props.error && React.createElement(
-        'div',
-        { className: 'error' },
-        'Sorry, your credientials could not be verified.',
-        React.createElement('br', null),
-        'Please try again.'
-      ),
+      React.createElement(Error, { error: props.error, classes: ['top'] }),
       React.createElement(
         'h1',
         null,
@@ -43880,6 +43888,24 @@ var routes = React.createElement(
 );
 
 ReactDOM.render(routes, root);
+
+/***/ }),
+/* 361 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const React = __webpack_require__(5);
+
+module.exports = function Error(props) {
+  let classes = ['error'];
+  if (Array.isArray(props.classes)) {
+    classes = classes.concat(props.classes);
+  }
+  return props.error && React.createElement(
+    'div',
+    { className: classes.join(' ') },
+    props.error
+  ) || null;
+};
 
 /***/ })
 /******/ ]);

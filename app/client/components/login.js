@@ -2,6 +2,7 @@ const React = require('react')
 const auth = require('../auth')
 const InputRow = require('./input-row')
 const Loading = require('./loading')
+const Error = require('./error')
 
 module.exports = React.createClass({
   getInitialState: function () {
@@ -33,7 +34,7 @@ module.exports = React.createClass({
     }
   },
   completeLogin: function () {
-    var dest = auth.nextPathname() || '/'
+    let dest = auth.nextPathname() || '/'
     this.props.router.replace(dest)
   },
   handleUpdateUsername (e) {
@@ -57,21 +58,24 @@ module.exports = React.createClass({
     this.setState({
       loginInProgress: true
     })
-    var submit = auth.signupOrLogin(this.state.username, this.state.password, this.state.newAccount)
+    let submit = auth.signupOrLogin(this.state.username, this.state.password, this.state.newAccount)
     submit.then(function (user) {
       if (user) {
         auth.updateUser(user)
         this.completeLogin()
       } else {
+        let msg = this.state.newAccount
+          ? 'Sorry, it looks like the username you chose is already taken.'
+          : 'Sorry, your login credentials could not be verified.'
         this.setState({
-          error: true,
+          error: msg,
           loginInProgress: false
         })
       }
     }.bind(this)).catch(function (err) {
       console.log(err)
       this.setState({
-        error: true,
+        error: 'Sorry, there was a problem validating your info.',
         loginInProgress: false
       })
     }.bind(this))
@@ -97,13 +101,13 @@ module.exports = React.createClass({
 })
 
 function LoginComponent (props) {
-  var title = props.newAccount ? 'Create your account to begin' : 'Sign in to your account'
-  var toggle = props.newAccount ? '(sign in)' : '(create an account)'
-  var buttonText = props.newAccount ? 'Create Account' : 'Sign In'
+  let title = props.newAccount ? 'Create your account to begin' : 'Sign in to your account'
+  let toggle = props.newAccount ? '(sign in)' : '(create an account)'
+  let buttonText = props.newAccount ? 'Create Account' : 'Sign In'
   return (
     <div className='inner loginContainer'>
       <form onSubmit={props.onSubmit}>
-        { props.error && <div className='error'>Sorry, your credientials could not be verified.<br />Please try again.</div>}
+        <Error error={props.error} classes={['top']} />
         <h1>
           {title}
         </h1>

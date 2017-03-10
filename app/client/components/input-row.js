@@ -1,4 +1,5 @@
 const React = require('react')
+const Error = require('./error')
 
 module.exports = function InputRow (props) {
   return (
@@ -8,6 +9,7 @@ module.exports = function InputRow (props) {
         placeholder={props.placeholder}
         autoFocus={props.autoFocus}
         onChange={props.onChange} />
+      <Error error={props.error} />
     </div>
   )
 }

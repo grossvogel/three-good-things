@@ -82,6 +82,11 @@ a {
   .input-row textarea {
     height: 8rem;
     font-size: 1rem; }
+  .input-row .error {
+    color: #D75694;
+    opacity: 0.65;
+    font-size: 0.9rem;
+    padding-top: 0.2rem; }
 
 select {
   font-size: 1.2rem; }
@@ -103,12 +108,13 @@ button, .button {
     font-size: 1rem;
     padding: 0.2rem 0.5rem; }
 
-.error {
+.top.error {
   margin-top: 1rem;
   background: #fefefe;
-  border: 2px solid #38B4DB;
+  border: 2px solid #D75694;
   padding: 1rem;
-  text-align: left; }
+  text-align: left;
+  color: #D75694; }
 
 .loader {
   text-align: center; }
