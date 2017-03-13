@@ -1,7 +1,7 @@
 const React = require('react')
 const Router = require('react-router')
 const Link = Router.Link
-const NotificationSettings = require('./notification-settings.js')
+const NotificationSettings = require('../containers/notification-settings.js')
 
 const Settings = function (props) {
   return (

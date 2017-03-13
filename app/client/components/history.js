@@ -1,41 +1,10 @@
 const React = require('react')
 const Router = require('react-router')
 const Link = Router.Link
-const api = require('../api')
-const Loading = require('./loading')
-const GoodThing = require('./good-thing')
+const GoodThing = require('../containers/good-thing')
 const dateUtil = require('../../date')
 
-module.exports = React.createClass({
-  getInitialState: function () {
-    return {
-      loading: true,
-      goodThings: []
-    }
-  },
-  componentWillMount: function () {
-    loadHistory().then(function (goodThings) {
-      this.setState({
-        loading: false,
-        goodThings: goodThings
-      })
-    }.bind(this))
-  },
-  handleClickGoodThing: function (date, index) {
-    let dest = '/day/' + dateUtil.stringify(date) + '/' + index
-    this.props.router.push(dest)
-  },
-  render: function () {
-    if (this.state.loading) {
-      return <Loading />
-    }
-    return <HistoryComponent
-      onClickGoodThing={this.handleClickGoodThing}
-      goodThings={this.state.goodThings} />
-  }
-})
-
-function HistoryComponent (props) {
+module.exports = function HistoryComponent (props) {
   let lastDay = dateUtil.stringify(dateUtil.today())
   let goodThingsThisDay = 1
   let items = []
@@ -112,14 +81,4 @@ function getMissedDays (currentDay, lastDay) {
   let missedMS = dateUtil.extract(lastDay).getTime() - dateUtil.extract(currentDay).getTime()
   let dayDiff = Math.round(missedMS / (1000 * 60 * 60 * 24))
   return dayDiff - 1
-}
-
-function loadHistory () {
-  var call = api.get('/good-things/history')
-  return call.then(function (result) {
-    return result.goodThings
-  }).catch(function (err) {
-    console.log(err)
-    return []
-  })
 }
