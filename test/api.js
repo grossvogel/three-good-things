@@ -184,7 +184,7 @@ describe('API', function () {
           .expect(404)
           .end(function (err, res) {
             if (err) assert.fail(err)
-            assert.equal(res.body.err, 'Not Found')
+            assert.equal(res.body.err, 'File Not Found')
             done()
           })
       }).catch(function (err) {
@@ -237,7 +237,7 @@ function getCSRFToken (testSession) {
     testSession.get('/')
       .expect(200)
       .end(function (err, res) {
-        if (err) reject()
+        if (err) reject(err)
         resolve(findCSRFTokenInDocument(res.text))
       })
   })

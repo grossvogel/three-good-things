@@ -112,7 +112,7 @@ function uploadFile (fileInput) {
     return api.upload('/uploads', blob, filename, 'upload')
   }).then(function (response) {
     if (response.err) {
-      return Promise.reject('Error uploading file')
+      return Promise.reject(new Error('Error uploading file'))
     } else {
       return response.upload
     }

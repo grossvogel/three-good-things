@@ -47,27 +47,27 @@ function registerServiceWorker (script) {
   if ('serviceWorker' in navigator) {
     return navigator.serviceWorker.register(script)
   } else {
-    return Promise.reject('Service Workers not supported')
+    return Promise.reject(new Error('Service Workers not supported'))
   }
 }
 
 function getSubscriptionState () {
   if (!('showNotification' in window.ServiceWorkerRegistration.prototype)) {
-    return Promise.reject('Notifications not supported')
+    return Promise.reject(new Error('Notifications not supported'))
   }
 
   if (window.Notification.permission === 'denied') {
-    return Promise.reject('User has denied permission to send notifications')
+    return Promise.reject(new Error('User has denied permission to send notifications'))
   }
 
   if (!('PushManager' in window)) {
-    return Promise.reject('Push messaging not supported')
+    return Promise.reject(new Error('Push messaging not supported'))
   }
 
   return navigator.serviceWorker.ready.then(function (serviceWorkerRegistration) {
     return serviceWorkerRegistration.pushManager.getSubscription()
   }).catch(function (_err) {
-    return Promise.reject('Error fetching subscription')
+    return Promise.reject(new Error('Error fetching subscription'))
   })
 }
 

@@ -15,7 +15,7 @@ module.exports = {
     }
     let promises = []
     for (let i = 0; i < collections.length; i++) {
-      promises.push(new Promise(function (resolve, reject) {
+      promises.push(new Promise(function (resolve) {
         mongoose.connection.collections[collections[i]].drop(function () {
           resolve()
         })

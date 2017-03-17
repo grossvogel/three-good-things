@@ -30,7 +30,7 @@ function fileUpload (config) {
       })
     }).catch(function (err) {
       res.status(500).json({
-        err: err, upload: null
+        err: err.message, upload: null
       })
     })
   }
@@ -63,7 +63,7 @@ function fileRemove (config) {
     }).then(function () {
       res.status(202).json({err: null})
     }).catch(function (err) {
-      res.status(500).json({err: err})
+      res.status(500).json({err: err.message})
     })
   }
 }
@@ -75,7 +75,7 @@ function getUpload (user, uploadId) {
     user: user,
     _id: uploadId
   }).exec().then(function (upload) {
-    return upload || Promise.reject('Not Found')
+    return upload || Promise.reject(new Error('File Not Found'))
   })
 }
 
@@ -84,7 +84,7 @@ function createUpload (user, originalFilename) {
   let {extension} = splitFilename(originalFilename)
   let contentType = getContentType(extension)
   if (!contentType) {
-    return Promise.reject('Invalid file extension')
+    return Promise.reject(new Error('Invalid file extension'))
   }
 
   let upload = new Upload({user, originalFilename, contentType})
@@ -124,7 +124,7 @@ function uploadFile (fileBuffer, upload, client, bucket) {
     }
     client.putObject(params, function (err, data) {
       if (err) {
-        reject('Error uploading file to S3')
+        reject(new Error('Error uploading file to S3'))
       } else {
         resolve(upload)
       }
@@ -160,7 +160,7 @@ function deleteS3File (client, bucket, filename) {
     }, function (err, data) {
       if (err) {
         console.log('S3 delete failed', err)
-        reject('S3 delete failed')
+        reject(new Error('S3 delete failed'))
       } else {
         resolve()
       }

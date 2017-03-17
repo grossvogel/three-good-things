@@ -41,10 +41,10 @@ function get (req, res, _next) {
     if (subscription) {
       res.json({err: null, subscription: subscription})
     } else {
-      return Promise.reject('Not Found')
+      return Promise.reject(new Error('File Not Found'))
     }
   }).catch(function (err) {
-    res.status(404).json({err: err, subscription: null})
+    res.status(404).json({err: err.message, subscription: null})
   })
 }
 
@@ -96,7 +96,7 @@ function saveSubscription (user, subscription) {
   let newSub
   let query = findSubscription(user, subscription.subscriptionId)
   return query.then(function (existing) {
-    if (!existing) return Promise.reject()
+    if (!existing) return Promise.reject(new Error('Subscription does not exist yet'))
 
     existing.endpoint = subscription.endpoint
     existing.timezone = subscription.timezone
@@ -150,7 +150,7 @@ function remind (subscription) {
     case PushService.Firefox:
       return remindFirefox(subscription)
     default:
-      return Promise.reject('Unknown Push Service')
+      return Promise.reject(new Error('Unknown Push Service'))
   }
 }
 
@@ -189,7 +189,7 @@ function remindChrome (subscription) {
 }
 
 function remindFirefox (subscription) {
-  return Promise.reject('Firefox notifications not implemented yet')
+  return Promise.reject(new Error('Firefox notifications not implemented yet'))
 }
 
 function timeMatches (now, subscription) {

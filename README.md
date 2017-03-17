@@ -12,8 +12,8 @@ Demo: https://three-goodthings.herokuapp.com/
 
 ### TODO
 
+* Click on a good thing image to enlarge
 * Get notifications working in Firefox
-* Image upload w/ device camera support
 * Load additional good things on history view
 * Server-side rendering?
 

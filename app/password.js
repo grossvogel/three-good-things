@@ -19,7 +19,7 @@ function check (rawPW, saltAndHashedPW) {
   var hashedPW, salt;
   [salt, hashedPW] = saltAndHashedPW.split('#')
   if (!salt || !hashedPW) {
-    return Promise.reject()
+    return Promise.reject(new Error('Hash format not recognized'))
   } else {
     return pbkdf2Hash(rawPW, salt).then(function (hashInfo) {
       return hashInfo.hash === hashedPW
