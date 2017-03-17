@@ -1,4 +1,5 @@
 const React = require('react')
+const Link = require('react-router').Link
 const InputRow = require('./input-row')
 
 module.exports = function GoodThingComponent (props) {
@@ -40,7 +41,9 @@ module.exports = function GoodThingComponent (props) {
 function GoodThingImage (props) {
   return (props.filename && (
     <div className='goodThingImage'>
-      <img src={'/uploads/' + props.filename} alt='' />
+      <Link to={'/image/' + props.filename} onClick={(e) => e.stopPropagation()}>
+        <img src={'/uploads/' + props.filename} alt='' />
+      </Link>
       {props.onRemoveImage && <a href='#' className='remove' onClick={props.onRemoveImage}>Remove</a>}
     </div>
   )) || null

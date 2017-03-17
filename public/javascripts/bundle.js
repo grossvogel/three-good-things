@@ -27481,6 +27481,7 @@ module.exports = function DayComponent(props) {
 /***/ (function(module, exports, __webpack_require__) {
 
 const React = __webpack_require__(4);
+const Link = __webpack_require__(30).Link;
 const InputRow = __webpack_require__(78);
 
 module.exports = function GoodThingComponent(props) {
@@ -27546,7 +27547,11 @@ function GoodThingImage(props) {
   return props.filename && React.createElement(
     'div',
     { className: 'goodThingImage' },
-    React.createElement('img', { src: '/uploads/' + props.filename, alt: '' }),
+    React.createElement(
+      Link,
+      { to: '/image/' + props.filename, onClick: e => e.stopPropagation() },
+      React.createElement('img', { src: '/uploads/' + props.filename, alt: '' })
+    ),
     props.onRemoveImage && React.createElement(
       'a',
       { href: '#', className: 'remove', onClick: props.onRemoveImage },
@@ -44062,6 +44067,7 @@ const Day = __webpack_require__(228);
 const Login = __webpack_require__(230);
 const Settings = __webpack_require__(227);
 const History = __webpack_require__(229);
+const Image = __webpack_require__(368);
 const App = __webpack_require__(226);
 const auth = __webpack_require__(76);
 const loginCheck = auth.loginCheck();
@@ -44078,11 +44084,35 @@ var routes = React.createElement(
     React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["Route"], { path: 'day/:date(/:editIndex)', component: Day, onEnter: loginCheck }),
     React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["Route"], { path: 'settings', component: Settings, onEnter: loginCheck }),
     React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["Route"], { path: 'history', component: History, onEnter: loginCheck }),
+    React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["Route"], { path: 'image/:filename', component: Image, onEnter: loginCheck }),
     React.createElement(__WEBPACK_IMPORTED_MODULE_0_react_router__["Route"], { path: 'login', component: Login })
   )
 );
 
 ReactDOM.render(routes, root);
+
+/***/ }),
+/* 368 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const React = __webpack_require__(4);
+
+module.exports = function Image(props) {
+  return React.createElement(
+    'div',
+    { className: 'imageView inner' },
+    React.createElement('img', { src: '/uploads/' + props.params.filename, alt: '', onClick: props.router.goBack }),
+    React.createElement(
+      'div',
+      null,
+      React.createElement(
+        'button',
+        { onClick: props.router.goBack },
+        'Done'
+      )
+    )
+  );
+};
 
 /***/ })
 /******/ ]);
