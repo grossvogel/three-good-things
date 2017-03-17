@@ -48,6 +48,7 @@ module.exports = React.createClass({
       editIndex={editIndex}
       onUpdateGoodThing={this.handleUpdateGoodThing}
       onClickGoodThing={this.handleClickGoodThing}
+      onUpload={this.handleUpload}
       goodThings={this.state.goodThings} />
   }
 })

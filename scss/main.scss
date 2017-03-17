@@ -104,7 +104,9 @@ a{
 
 
 .input-row{
+  position:relative;
   margin-bottom:$padding;
+  margin-right:100px;
   label{
     font-size:0.9rem;
     text-transform:uppercase;
@@ -214,6 +216,12 @@ header{
   li{
     list-style:none;
     margin-top: $padding * 1.5;
+    clear:both;
+    &:after{
+      content: '';
+      display: table;
+      clear: both;
+    }
   }
   li.goodThing{
   	@include shadow;
@@ -241,7 +249,7 @@ header{
   li.dateHeader{
     display:block;
     font-size: 1.4rem;
-	padding-bottom:0.3 * $padding;
+    padding-bottom:0.3 * $padding;
     a {
       color:$color_text;
       text-decoration:none;
@@ -272,6 +280,34 @@ header{
     opacity:0.8;
     font-size:0.9rem;
     margin-bottom:0;
+  }
+  .photoButton{
+    position:absolute;
+    bottom: 12px;
+    left: 260px;
+    max-width:32px;
+    opacity:0.80;
+    cursor:pointer;
+    &:hover{
+      opacity:1;
+    }
+  }
+  .fileInput{
+    display:none;
+  }
+  .goodThingImage{
+    float: right;
+    width:100px;
+    text-align:center;
+    z-index:4;
+    img{
+      max-width:100%;
+      @include shadow
+    }
+    a{
+      font-size:0.8rem;
+      color:$color_error;
+    }
   }
 }
 .day .historyLink{
@@ -322,3 +358,11 @@ header{
 .settingsDone{
   margin-top: 4rem;
 }
+
+@media only screen and (max-width:650px){
+	.editing .goodThingImage{
+		float:none;
+		margin-bottom:8px;
+	}
+}
+

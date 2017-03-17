@@ -13,7 +13,6 @@ module.exports = React.createClass({
   },
   componentWillMount: function () {
     loadHistory().then(function (goodThings) {
-      console.log(goodThings)
       this.setState({
         loading: false,
         goodThings: goodThings

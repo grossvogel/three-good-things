@@ -1,7 +1,8 @@
 module.exports = {
-  post: post,
-  get: get,
-  request: request
+  post,
+  get,
+  request,
+  upload
 }
 
 const defaults = {
@@ -24,6 +25,15 @@ function post (endpoint, data) {
 
 function get (endpoint) {
   return request(endpoint)
+}
+
+function upload (endpoint, data, filename, fieldName) {
+  fieldName = fieldName || 'upload'
+  let formData = new window.FormData()
+  formData.append(fieldName, data, filename)
+  return request(endpoint, 'post', {
+    body: formData
+  })
 }
 
 function request (endpoint, method, options) {

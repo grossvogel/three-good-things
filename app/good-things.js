@@ -33,7 +33,9 @@ function fetchDay (user, date) {
   return GoodThing.find({
     user: user,
     day: date
-  }).sort('created_at').exec()
+  }).populate('image', '_id filename')
+  .sort('created_at')
+  .exec()
 }
 
 //  private helpers
@@ -48,6 +50,7 @@ function getGoodThings (user, date, res) {
 
 function fetchHistory (user, limit = 100) {
   return GoodThing.find({user: user})
+    .populate('image', 'filename')
     .sort({day: -1, created_at: 1})
     .limit(limit)
     .exec()
@@ -72,6 +75,9 @@ function extractGoodThingParams (user, req) {
     title: req.body.title,
     details: req.body.details
   }
+  if (req.body.uploadId) {
+    params.image = req.body.uploadId
+  }
   if (req.body.id) {
     params.id = req.body.id
   }
@@ -86,6 +92,9 @@ function updateGoodThing (params) {
   return query.then(function (goodThing) {
     goodThing.title = params.title
     goodThing.details = params.details
+    if (params.image) {
+      goodThing.image = params.image
+    }
     return goodThing.save()
   })
 }

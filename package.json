@@ -9,6 +9,7 @@
     "notify": "node ./bin/notify.js"
   },
   "dependencies": {
+    "aws-sdk": "^2.27.0",
     "body-parser": "~1.16.0",
     "client-sessions": "^0.7.0",
     "cookie-parser": "~1.4.3",
@@ -22,6 +23,7 @@
     "moment-timezone": "^0.5.11",
     "mongoose": "^4.8.4",
     "morgan": "~1.7.0",
+    "multer": "^1.3.0",
     "node-sass-middleware": "0.9.8",
     "passport": "^0.3.2",
     "passport-google-oauth": "^1.0.0",

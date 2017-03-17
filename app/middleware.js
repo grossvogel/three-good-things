@@ -64,7 +64,8 @@ function helmetOptions () {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ['fonts.googleapis.com', "'self'"],
-        fontSrc: ['fonts.gstatic.com', 'data:']
+        fontSrc: ['fonts.gstatic.com', 'data:'],
+        imgSrc: ['data:', "'self'"]
       }
     }
   }

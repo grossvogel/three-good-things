@@ -61,7 +61,9 @@ a {
     color: #1486aa; }
 
 .input-row {
-  margin-bottom: 1rem; }
+  position: relative;
+  margin-bottom: 1rem;
+  margin-right: 100px; }
   .input-row label {
     font-size: 0.9rem;
     text-transform: uppercase;
@@ -153,7 +155,12 @@ header .menu {
   z-index: 1; }
   .goodThingList li {
     list-style: none;
-    margin-top: 1.5rem; }
+    margin-top: 1.5rem;
+    clear: both; }
+    .goodThingList li:after {
+      content: '';
+      display: table;
+      clear: both; }
   .goodThingList li.goodThing {
     box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.18);
     position: relative;
@@ -200,6 +207,28 @@ header .menu {
     opacity: 0.8;
     font-size: 0.9rem;
     margin-bottom: 0; }
+  .goodThingList .photoButton {
+    position: absolute;
+    bottom: 12px;
+    left: 260px;
+    max-width: 32px;
+    opacity: 0.80;
+    cursor: pointer; }
+    .goodThingList .photoButton:hover {
+      opacity: 1; }
+  .goodThingList .fileInput {
+    display: none; }
+  .goodThingList .goodThingImage {
+    float: right;
+    width: 100px;
+    text-align: center;
+    z-index: 4; }
+    .goodThingList .goodThingImage img {
+      max-width: 100%;
+      box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.18); }
+    .goodThingList .goodThingImage a {
+      font-size: 0.8rem;
+      color: #D75694; }
 
 .day .historyLink {
   margin-top: 1rem;
@@ -253,5 +282,10 @@ header .menu {
 
 .settingsDone {
   margin-top: 4rem; }
+
+@media only screen and (max-width: 650px) {
+  .editing .goodThingImage {
+    float: none;
+    margin-bottom: 8px; } }
 
 /*# sourceMappingURL=main.css.map */

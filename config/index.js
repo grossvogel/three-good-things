@@ -9,6 +9,12 @@ const defaults = {
     id: process.env.GOOGLE_CLIENT_ID,
     secret: process.env.GOOGLE_CLIENT_SECRET
   },
+  aws: {
+    accessKey: process.env.AWS_ACCESS_KEY,
+    secretKey: process.env.AWS_SECRET_KEY,
+    defaultRegion: process.env.AWS_REGION,
+    S3Bucket: 'three-good-things'
+  },
   push: {
     serverKey: process.env.PUSH_MSG_SERVER_KEY
   }
