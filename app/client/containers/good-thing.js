@@ -1,32 +1,44 @@
-const React = require('react')
-const api = require('../api')
-const imageUtil = require('../image')
-const dateUtil = require('../../date')
-const GoodThingComponent = require('../components/good-thing')
+import React from 'react'
+import { connect } from 'react-redux'
+import api from '../api'
+import imageUtil from '../image'
+import dateUtil from '../../date'
+import GoodThingComponent from '../components/good-thing'
+import { saveGoodThing } from '../actions/good-thing'
 
-module.exports = React.createClass({
-  getInitialState: function () {
-    let image = this.props.goodThing.image
-    return {
-      title: this.props.goodThing.title,
-      details: this.props.goodThing.details,
+class GoodThing extends React.Component {
+  constructor (props) {
+    super(props)
+    let image = props.goodThing.image
+    this.state = {
+      title: props.goodThing.title,
+      details: props.goodThing.details,
       image: image ? image.filename : null,
       uploadId: image ? image._id : null,
       titleError: null
     }
-  },
-  handleUpdateTitle: function (e) {
+    this.handleUpdateTitle = this.handleUpdateTitle.bind(this)
+    this.handleUpdateDetails = this.handleUpdateDetails.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
+    this.handleClick = this.handleClick.bind(this)
+    this.handleInitUpload = this.handleInitUpload.bind(this)
+    this.handleRemoveImage = this.handleRemoveImage.bind(this)
+  }
+
+  handleUpdateTitle (e) {
     this.setState({
       title: e.target.value,
       titleError: null
     })
-  },
-  handleUpdateDetails: function (e) {
+  }
+
+  handleUpdateDetails (e) {
     this.setState({
       details: e.target.value
     })
-  },
-  handleSubmit: function (e) {
+  }
+
+  handleSubmit (e) {
     if (e) {
       e.preventDefault()
     }
@@ -36,8 +48,9 @@ module.exports = React.createClass({
       })
       return
     }
+
     let updateHandler = this.props.onUpdateGoodThing
-    saveGoodThing({
+    this.props.saveGoodThing({
       id: this.props.goodThing.id,
       day: this.props.date,
       title: this.state.title,
@@ -49,11 +62,13 @@ module.exports = React.createClass({
       console.log(err)
       updateHandler()
     })
-  },
-  handleClick: function () {
+  }
+
+  handleClick () {
     this.props.onClickGoodThing(this.props.date, this.props.number - 1)
-  },
-  handleInitUpload: function (e) {
+  }
+
+  handleInitUpload (e) {
     let component = this
     uploadFile(e.target).then(function (upload) {
       component.setState({
@@ -63,8 +78,9 @@ module.exports = React.createClass({
         component.handleSubmit()
       })
     })
-  },
-  handleRemoveImage: function (e) {
+  }
+
+  handleRemoveImage (e) {
     e.preventDefault()
     let image = this.state.image
     this.setState({
@@ -74,8 +90,9 @@ module.exports = React.createClass({
     deleteUpload(image).catch(function (err) {
       console.log(err)
     })
-  },
-  render: function () {
+  }
+
+  render () {
     return <GoodThingComponent
       number={this.props.number}
       title={this.state.title}
@@ -90,13 +107,6 @@ module.exports = React.createClass({
       onRemoveImage={this.handleRemoveImage}
       onSubmit={this.handleSubmit} />
   }
-})
-
-function saveGoodThing (data) {
-  data.day = dateUtil.stringify(data.day)
-  return api.post('/good-things', data).then(function (result) {
-    return result.goodThing
-  })
 }
 
 function uploadFile (fileInput) {
@@ -122,3 +132,16 @@ function uploadFile (fileInput) {
 function deleteUpload (upload) {
   return api.request('/uploads/' + upload, 'delete')
 }
+
+const mapStateToProps = function (state) {
+  return {}
+}
+const mapDispatchToProps = function (dispatch) {
+  return {
+    saveGoodThing: (data) => {
+      return dispatch(saveGoodThing(data))
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(GoodThing)

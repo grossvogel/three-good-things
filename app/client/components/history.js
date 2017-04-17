@@ -1,10 +1,9 @@
-const React = require('react')
-const Router = require('react-router')
-const Link = Router.Link
-const GoodThing = require('../containers/good-thing')
-const dateUtil = require('../../date')
+import React from 'react'
+import { Link } from 'react-router'
+import GoodThing from '../containers/good-thing'
+import dateUtil from '../../date'
 
-module.exports = function HistoryComponent (props) {
+export default function HistoryComponent (props) {
   let lastDay = dateUtil.stringify(dateUtil.today())
   let goodThingsThisDay = 1
   let items = []

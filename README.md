@@ -12,7 +12,6 @@ Demo: https://three-goodthings.herokuapp.com/
 
 ### TODO
 
-* Click on a good thing image to enlarge
 * Get notifications working in Firefox
 * Load additional good things on history view
 * Server-side rendering?

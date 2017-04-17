@@ -16,7 +16,7 @@ function serveSinglePage (req, res, next) {
   res.render('index', {
     title: 'Three Good Things',
     csrf: req.csrfToken(),
-    pushServerKey: config.push.publicKey
+    pushServerKey: config.push.signingKeyPublic
   })
 }
 

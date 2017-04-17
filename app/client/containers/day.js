@@ -1,75 +1,50 @@
-const React = require('react')
-const dateUtil = require('../../date')
-const api = require('../api')
-const Loading = require('../components/loading')
-const DayComponent = require('../components/day')
+import React from 'react'
+import { connect } from 'react-redux'
+import dateUtil from '../../date'
+import Loading from '../components/loading'
+import DayComponent from '../components/day'
+import * as actions from '../actions/day'
 
-module.exports = React.createClass({
-  getInitialState: function () {
-    return {
-      loading: true,
-      goodThings: []
-    }
-  },
-  componentWillMount: function () {
-    this.loadData(this.props.params.date)
-  },
-  handleUpdateGoodThing: function () {
-    this.loadData(this.props.params.date)
-  },
-  handleClickGoodThing: function (date, index) {
+class Day extends React.Component {
+  componentWillMount () {
+    this.props.loadData(this.props.params.date)
+  }
+
+  handleUpdateGoodThing () {
+    this.props.loadData(this.props.params.date)
+  }
+
+  handleClickGoodThing (date, index) {
     let dest = '/day/' + dateUtil.stringify(date) + '/' + index
     this.props.router.replace(dest)
-  },
-  componentWillReceiveProps: function (nextProps) {
-    this.setState({
-      loading: true
-    }, function () {
-      this.loadData(nextProps.params.date)
-    })
-  },
-  loadData: function (date) {
-    loadGoodThings(date).then(function (goodThings) {
-      this.setState({
-        loading: false,
-        goodThings: goodThings
-      })
-    }.bind(this))
-  },
-  render: function () {
+  }
+
+  componentWillReceiveProps (nextProps) {
+    if (nextProps.params.date !== this.props.params.date) {
+      this.props.loadData(nextProps.params.date)
+    }
+  }
+
+  render () {
     let [ date, today ] = extractDate(this.props.params.date)
-    let editIndex = extractEditIndex(this.props.params.editIndex, this.state.goodThings, today)
-    if (this.state.loading) {
+    let editIndex = extractEditIndex(this.props.params.editIndex, this.props.goodThings, today)
+    if (this.props.loading) {
       return <Loading />
     }
     return <DayComponent
       today={today}
       date={date}
       editIndex={editIndex}
-      onUpdateGoodThing={this.handleUpdateGoodThing}
-      onClickGoodThing={this.handleClickGoodThing}
-      onUpload={this.handleUpload}
-      goodThings={this.state.goodThings} />
+      onUpdateGoodThing={this.handleUpdateGoodThing.bind(this)}
+      onClickGoodThing={this.handleClickGoodThing.bind(this)}
+      goodThings={this.props.goodThings} />
   }
-})
+}
 
 function extractDate (initial) {
   var today = dateUtil.today()
   var date = dateUtil.extract(initial, true) || today
   return [ date, (date.valueOf() === today.valueOf()) ]
-}
-
-function loadGoodThings (dateParam) {
-  let [ date, today ] = extractDate(dateParam)
-  var call = api.get('/good-things/' + dateUtil.stringify(date))
-  return call.then(function (result) {
-    return result.goodThings
-  }).catch(function (err) {
-    console.log(err)
-    return []
-  }).then(function (goodThings) {
-    return finalizeThings(goodThings, today)
-  })
 }
 
 function finalizeThings (goodThings, today) {
@@ -90,7 +65,7 @@ function finalizeThings (goodThings, today) {
 
 function extractEditIndex (initial, goodThings, today) {
   let editIndex = parseInt(initial)
-  let goodThingCount = goodThings.length
+  let goodThingCount = goodThings.length || goodThings.size
   switch (editIndex) {
     case 0:
     case 1:
@@ -105,3 +80,30 @@ function extractEditIndex (initial, goodThings, today) {
   }
   return editIndex
 }
+
+const mapStateToProps = function (state, ownProps) {
+  let dateParam = ownProps.params.date
+  let [date, today] = extractDate(dateParam)
+  let day = state.getIn(['day', dateUtil.stringify(date)]) || null
+  let things = day ? day.get('goodThings') : []
+  let goodThings = finalizeThings(
+    things.map(id => state.get('goodThings').get(id)),
+    today)
+  return {
+    date,
+    today,
+    goodThings,
+    loading: day ? day.get('loading') : true
+  }
+}
+
+const mapDispatchToProps = function (dispatch) {
+  return {
+    loadData: function (dateParam) {
+      let [date] = extractDate(dateParam)
+      dispatch(actions.loadDay(date))
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Day)

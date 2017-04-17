@@ -44,11 +44,23 @@ function today () {
 }
 
 function stringify (date) {
+  if (typeof date === 'string') {
+    let [datePart] = date.split('T')
+    return datePart
+  }
   return [
     date.getFullYear(),
-    date.getMonth() + 1,
-    date.getDate()
+    padLeft(date.getMonth() + 1, 2),
+    padLeft(date.getDate(), 2)
   ].join('-')
+}
+
+function padLeft (s, length, padding = '0') {
+  s = String(s)
+  while (s.length < length) {
+    s = padding + s
+  }
+  return s
 }
 
 function niceFormat (date) {

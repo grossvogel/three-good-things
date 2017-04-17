@@ -16,7 +16,9 @@ const defaults = {
     S3Bucket: 'three-good-things'
   },
   push: {
-    serverKey: process.env.PUSH_MSG_SERVER_KEY
+    serverKey: process.env.PUSH_MSG_SERVER_KEY,
+    signingKeyPublic: process.env.PUSH_MSG_KEY_PUBLIC,
+    signingKeyPrivate: process.env.PUSH_MSG_KEY_PUBLIC
   }
 }
 

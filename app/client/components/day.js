@@ -1,10 +1,9 @@
-const React = require('react')
-const Router = require('react-router')
-const dateUtil = require('../../date')
-const GoodThing = require('../containers/good-thing')
-const Link = Router.Link
+import React from 'react'
+import { Link } from 'react-router'
+import dateUtil from '../../date'
+import GoodThing from '../containers/good-thing'
 
-module.exports = function DayComponent (props) {
+function DayComponent (props) {
   var nextDay = dateUtil.stringify(dateUtil.nextDay(props.date))
   var prevDay = dateUtil.stringify(dateUtil.previousDay(props.date))
   return (
@@ -36,3 +35,5 @@ module.exports = function DayComponent (props) {
     </div>
   )
 }
+
+export default DayComponent
